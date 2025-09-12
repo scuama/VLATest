@@ -21,5 +21,4 @@ einops==0.8.0
 transformers==4.42.1
 scipy==1.12.0
 timm==0.9.10
-numba==0.60.0
-numpy==1.24.4
+numba
