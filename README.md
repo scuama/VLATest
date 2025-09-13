@@ -84,6 +84,8 @@ Note that the repo is default to `/VLATest` instead of `~/VLATest`.
 
 ### 1.3 Inference Setup
 
+Now, go to the directory where you pull the repo. For example, if you use the docker, ``cd /VLATest``.
+
 #### RT-1 Inference Setup
 
 Download RT-1 Checkpoint:
@@ -91,27 +93,23 @@ Download RT-1 Checkpoint:
 # First, install gsutil following https://cloud.google.com/storage/docs/gsutil_install
 
 # Make a checkpoint dir:
-mkdir VLATest/checkpoints
+mkdir checkpoints
 
 # RT-1-X
-cd VLATest
 gsutil -m cp -r gs://gdm-robotics-open-x-embodiment/open_x_embodiment_and_rt_x_oss/rt_1_x_tf_trained_for_002272480_step.zip .
 unzip rt_1_x_tf_trained_for_002272480_step.zip
 mv rt_1_x_tf_trained_for_002272480_step checkpoints
 rm rt_1_x_tf_trained_for_002272480_step.zip
 
 # RT-1-400k
-cd VLATest
 gsutil -m cp -r gs://gdm-robotics-open-x-embodiment/open_x_embodiment_and_rt_x_oss/rt_1_tf_trained_for_000400120 .
 mv rt_1_tf_trained_for_000400120 checkpoints
 
 # RT-1-58k
-cd VLATest
 gsutil -m cp -r gs://gdm-robotics-open-x-embodiment/open_x_embodiment_and_rt_x_oss/rt_1_tf_trained_for_000058240 .
 mv rt_1_tf_trained_for_000058240 checkpoints
 
 # RT-1-1k
-cd VLATest
 gsutil -m cp -r gs://gdm-robotics-open-x-embodiment/open_x_embodiment_and_rt_x_oss/rt_1_tf_trained_for_000001120 .
 mv rt_1_tf_trained_for_000001120 checkpoints      
 ```
@@ -122,7 +120,6 @@ Install Octo:
 ```
 pip install --upgrade "jax[cuda12_pip]==0.4.20" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html # or jax[cuda12_pip] if you have CUDA 12
 
-cd VLATest
 git clone https://github.com/octo-models/octo/
 cd octo
 git checkout 653c54acde686fde619855f2eac0dd6edad7116b  # we use octo-1.0
