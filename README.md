@@ -10,9 +10,11 @@ Our generated testing scenes is provided under ``data/`` in json files. To repro
 
 ## 1. Installation
 
-**If you want to use pre-built docker image, skip 1.1.**
+If you want to use pre-built docker image, **skip 1.1**.
 
 ### 1.1 Local Installation
+<details>
+<summary>Local installation steps</summary>
 
 Prerequisites:
 - CUDA version >=12.
@@ -58,6 +60,7 @@ Install simulated annealing utils for system identification:
 ```
 pip install git+https://github.com/nathanrooy/simulated-annealing
 ```
+</details>
 
 ### 1.2 Docker Installation (Recommended)
 
