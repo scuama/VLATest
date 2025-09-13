@@ -4,12 +4,15 @@ This repository includes the replication package for ``VLATest: Testing and Eval
 
 The codebase is modified based on [SimplerEnv](https://github.com/simpler-env/SimplerEnv) and [ManiSkill2_real2sim](https://github.com/simpler-env/ManiSkill2_real2sim/tree/cd45dd27dc6bb26d048cb6570cdab4e3f935cc37)
 
-## Data Availability
+## 0. Data Availability
 
 Our generated testing scenes is provided under ``data/`` in json files. To reproduce our experiment results, one can proceed to the following installation and replication guides. 
 
+## 1. Installation
 
-## Installation
+**If you want to use pre-built docker image, skip 1.1.**
+
+### 1.1 Local Installation
 
 Prerequisites:
 - CUDA version >=12.
@@ -45,9 +48,10 @@ sudo apt install ffmpeg
 ```
 
 ```
-pip install tensorflow==2.15.0
 pip install -r requirements_full_install.txt
 pip install tensorflow[and-cuda]==2.15.1 # tensorflow gpu support
+pip install gymnasium==0.29.1
+pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 ```
 
 Install simulated annealing utils for system identification:
@@ -55,7 +59,29 @@ Install simulated annealing utils for system identification:
 pip install git+https://github.com/nathanrooy/simulated-annealing
 ```
 
-### RT-1 Inference Setup
+### 1.2 Docker Installation (Recommended)
+
+Prerequisites:
+- CUDA version >=12.
+- An NVIDIA GPU.
+- [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+
+```
+docker pull zhijiewang22/vlatest:0.2
+
+sudo docker run -dt -e "USER=vlatest" -e "PASSWORD=vlatest" -e \
+  "SHELL=zsh" -p 48022:22 --ipc=host \
+  --gpus 'all,"capabilities=compute,utility,graphics,display"' \
+  --name=vlatest zhijiewang22/vlatest:0.2
+  
+ssh -p 48022 vlatest@localhost
+```
+
+Note that the repo is default to `/VLATest` instead of `~/VLATest`.
+
+### 1.3 Inference Setup
+
+#### RT-1 Inference Setup
 
 Download RT-1 Checkpoint:
 ```
@@ -87,7 +113,7 @@ gsutil -m cp -r gs://gdm-robotics-open-x-embodiment/open_x_embodiment_and_rt_x_o
 mv rt_1_tf_trained_for_000001120 checkpoints      
 ```
 
-### Octo Inference Setup
+#### Octo Inference Setup
 
 Install Octo:
 ```
@@ -102,7 +128,14 @@ pip install -e .
 # Octo checkpoints are managed by huggingface, so you don't need to download them manually.
 ```
 
-## Replication Package
+#### OpenVLA Inference Setup
+
+```
+pip install --no-cache-dir torch==2.5.1 torchvision==0.20.1 --index-url https://download.pytorch.org/whl/cu121
+pip install timm==0.9.10
+```
+
+## 3. Replication Package
 
 To reproduce experiment results with our generated testing scenes (``data/``):
 
@@ -141,7 +174,7 @@ cd experiments
 
 The experiment results will be generated within ``results/``
 
-## Data Generation
+## 4. Data Generation
 
 To generate new testing scenes:
 
@@ -198,7 +231,7 @@ PYTHONPATH=~/VLATest python3 test_generation.py -t put-in -n 1000 --ro --ycb
 ### RQ6
 This RQ reuses the data from RQ1.
 
-## Citation
+## 5 Citation
 
 If you found our paper/code useful in your research, please consider citing:
 
@@ -215,7 +248,7 @@ If you found our paper/code useful in your research, please consider citing:
 } 
 ```
 
-## Acknowledgement
+## 6  Acknowledgement
 
 - [SimplerEnv](https://github.com/simpler-env/SimplerEnv)
 - 
