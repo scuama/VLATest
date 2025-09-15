@@ -82,6 +82,8 @@ ssh -p 48022 vlatest@localhost
 
 Note that the repo is default to `/VLATest` instead of `~/VLATest`.
 
+Now, you should be able to run the minimal example in `test_vla_inference.ipynb` with OpenVLA-7b. If you want to test RT-1 series models and Octo, please proceed to 1.3.
+
 ### 1.3 Inference Setup
 
 Now, go to the directory where you pull the repo. For example, if you use the docker, ``cd /VLATest``.
