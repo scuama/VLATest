@@ -128,13 +128,6 @@ pip install -e .
 # Octo checkpoints are managed by huggingface, so you don't need to download them manually.
 ```
 
-#### OpenVLA Inference Setup
-
-```
-pip install --no-cache-dir torch==2.5.1 torchvision==0.20.1 --index-url https://download.pytorch.org/whl/cu121
-pip install timm==0.9.10
-```
-
 ## 3. Replication Package
 
 To reproduce experiment results with our generated testing scenes (``data/``):
