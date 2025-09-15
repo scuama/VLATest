@@ -70,12 +70,12 @@ Prerequisites:
 - [Nvidia container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
 
 ```
-docker pull zhijiewang22/vlatest:0.2
+sudo docker pull zhijiewang22/vlatest:0.3
 
 sudo docker run -dt -e "USER=vlatest" -e "PASSWORD=vlatest" -e \
   "SHELL=zsh" -p 48022:22 --ipc=host \
   --gpus 'all,"capabilities=compute,utility,graphics,display"' \
-  --name=vlatest zhijiewang22/vlatest:0.2
+  --name=vlatest zhijiewang22/vlatest:0.3
   
 ssh -p 48022 vlatest@localhost
 ```
