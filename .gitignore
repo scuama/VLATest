@@ -32,3 +32,11 @@ checkpoints/
 backup/
 
 results/
+google-cloud-sdk
+images
+training/data
+logs
+models
+.codebuddy
+
+ManiSkill2_real2sim

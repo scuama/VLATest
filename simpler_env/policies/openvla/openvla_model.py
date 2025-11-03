@@ -28,7 +28,8 @@ class OpenVLAInference:
         image_size: int = 224,
         action_scale: float = 1.0,
         init_rng: int = 0,
-        device: str = "cuda:0"
+        device: str = "cuda:0",
+        lora_path: Optional[str] = None  # 新增：LoRA适配器路径
     ) -> None:
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
         if policy_setup == "widowx_bridge":
@@ -50,9 +51,27 @@ class OpenVLAInference:
         if model_type in ["openvla-7b"]:
             self.model_type = f"openvla/{model_type}"
             self.tokenizer = AutoProcessor.from_pretrained(self.model_type, trust_remote_code=True)
-            self.model = AutoModelForVision2Seq.from_pretrained(self.model_type,
-                                                                torch_dtype=torch.bfloat16,
-                                                                trust_remote_code=True).to(device)
+            
+            # 加载基础模型
+            base_model = AutoModelForVision2Seq.from_pretrained(
+                self.model_type,
+                torch_dtype=torch.bfloat16,
+                trust_remote_code=True,
+                attn_implementation="eager"  # 避免SDPA兼容性问题
+            ).to(device)
+            
+            # 如果提供了LoRA路径，加载LoRA适配器
+            if lora_path is not None:
+                print(f"加载LoRA适配器: {lora_path}")
+                from peft import PeftModel
+                self.model = PeftModel.from_pretrained(
+                    base_model,
+                    lora_path,
+                    torch_dtype=torch.bfloat16
+                )
+                print("✓ LoRA适配器加载成功")
+            else:
+                self.model = base_model
         else:
             raise NotImplementedError()
 

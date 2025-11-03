@@ -44,7 +44,7 @@ sapien.render_config.rt_use_denoiser = True
 
 
 class VLAInterface:
-    def __init__(self, task, model_name):
+    def __init__(self, task, model_name, lora_path=None):
         if task in TASKS:
             self.task = task
         else:
@@ -65,14 +65,18 @@ class VLAInterface:
         elif "openvla" in model_name:
             from simpler_env.policies.openvla.openvla_model import OpenVLAInference
 
-            self.model = OpenVLAInference(model_type=model_name, policy_setup=self.policy_setup)
+            self.model = OpenVLAInference(model_type=model_name, policy_setup=self.policy_setup, lora_path=lora_path)
         else:
             raise ValueError(model_name)
 
     def run_interface(self, seed=None, options=None):
         env = simpler_env.make(self.task)
         obs, reset_info = env.reset(seed=seed, options=options)
-        instruction = env.get_language_instruction()
+        # Handle potential wrapper - try direct method first, fallback to unwrapped
+        if hasattr(env, 'get_language_instruction'):
+            instruction = env.get_language_instruction()
+        else:
+            instruction = env.unwrapped.get_language_instruction()
         self.model.reset(instruction)
         print(instruction)
         print("Reset info", reset_info)

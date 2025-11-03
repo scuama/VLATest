@@ -34,6 +34,8 @@ if __name__ == '__main__':
                         choices=["rt_1_x", "rt_1_400k", "rt_1_58k", "rt_1_1k", "octo-base", "octo-small", "openvla-7b"],
                         default="rt_1_x",
                         help="VLA model")
+    parser.add_argument('-l', '--lora_path', type=str, default=None,
+                        help="LoRA adapter path for finetuned OpenVLA model")
     parser.add_argument('-r', '--resume', type=bool, default=True, help="Resume from where we left.")
 
     args = parser.parse_args()
@@ -46,24 +48,24 @@ if __name__ == '__main__':
 
     if "grasp" in dataset_name:
         if 'ycb' in dataset_name:
-            vla = VLAInterface(model_name=args.model, task="google_robot_pick_customizable_ycb")
+            vla = VLAInterface(model_name=args.model, task="google_robot_pick_customizable_ycb", lora_path=args.lora_path)
         else:
-            vla = VLAInterface(model_name=args.model, task="google_robot_pick_customizable")
+            vla = VLAInterface(model_name=args.model, task="google_robot_pick_customizable", lora_path=args.lora_path)
     elif "move" in dataset_name:
         if 'ycb' in dataset_name:
-            vla = VLAInterface(model_name=args.model, task="google_robot_move_near_customizable_ycb")
+            vla = VLAInterface(model_name=args.model, task="google_robot_move_near_customizable_ycb", lora_path=args.lora_path)
         else:
-            vla = VLAInterface(model_name=args.model, task="google_robot_move_near_customizable")
+            vla = VLAInterface(model_name=args.model, task="google_robot_move_near_customizable", lora_path=args.lora_path)
     elif "put-on" in dataset_name:
         if 'ycb' in dataset_name:
-            vla = VLAInterface(model_name=args.model, task="widowx_put_on_customizable_ycb")
+            vla = VLAInterface(model_name=args.model, task="widowx_put_on_customizable_ycb", lora_path=args.lora_path)
         else:
-            vla = VLAInterface(model_name=args.model, task="widowx_put_on_customizable")
+            vla = VLAInterface(model_name=args.model, task="widowx_put_on_customizable", lora_path=args.lora_path)
     elif "put-in" in dataset_name:
         if 'ycb' in dataset_name:
-            vla = VLAInterface(model_name=args.model, task="widowx_put_in_customizable_ycb")
+            vla = VLAInterface(model_name=args.model, task="widowx_put_in_customizable_ycb", lora_path=args.lora_path)
         else:
-            vla = VLAInterface(model_name=args.model, task="widowx_put_in_customizable")
+            vla = VLAInterface(model_name=args.model, task="widowx_put_in_customizable", lora_path=args.lora_path)
     else:
         raise NotImplementedError
 
@@ -75,7 +77,10 @@ if __name__ == '__main__':
     else:
         result_dir = str(PACKAGE_DIR) + "/../results/" + data_path.split('/')[-1].split(".")[0]
     os.makedirs(result_dir, exist_ok=True)
-    result_dir += f'/{args.model}_{random_seed}'
+    
+    # 如果使用LoRA，在目录名中标注
+    model_tag = f"{args.model}_finetuned" if args.lora_path else args.model
+    result_dir += f'/{model_tag}_{random_seed}'
     if not args.resume:
         if os.path.exists(result_dir):
             shutil.rmtree(result_dir)
