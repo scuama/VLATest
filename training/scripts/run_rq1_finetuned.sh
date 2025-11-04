@@ -1,11 +1,17 @@
 #!/bin/bash
 #
-# RQ1实验脚本 - 使用微调后的OpenVLA模型
+# RQ1实验脚本 - OpenVLA模型评估（支持预训练基线和微调模型）
 # 评估4个基础任务的性能：grasp, move, put-on, put-in
 #
 # 使用方法:
-#   cd /mnt/disk1/decom/VLATest/training/scripts
-#   bash run_rq1_finetuned.sh
+#   # 运行预训练基线
+#   bash run_rq1_finetuned.sh baseline
+#   
+#   # 运行微调模型
+#   bash run_rq1_finetuned.sh finetuned
+#   
+#   # 后台运行
+#   nohup bash run_rq1_finetuned.sh baseline > ../../training/logs/rq1_baseline_$(date +%Y%m%d_%H%M%S).log 2>&1 &
 #
 
 set -e  # 遇到错误立即退出
@@ -15,7 +21,10 @@ set -e  # 遇到错误立即退出
 # 项目根目录
 PROJECT_ROOT="/mnt/disk1/decom/VLATest"
 
-# 微调模型路径（可以修改为final_model或其他checkpoint）
+# 运行模式：baseline（预训练）或 finetuned（微调）
+RUN_MODE="${1:-finetuned}"  # 默认运行微调模型
+
+# 微调模型路径（仅在finetuned模式下使用）
 LORA_MODEL_PATH="${PROJECT_ROOT}/training/checkpoints/openvla_grasp_test/best_model"
 
 # 基础模型名称
@@ -35,8 +44,20 @@ DATASETS=(
 # 超时时间（每个数据集）
 TIMEOUT_DURATION="2h"
 
-# 结果目录标识（用于区分微调模型和预训练模型）
-MODEL_TAG="${BASE_MODEL}_finetuned"
+# 根据运行模式设置标识和LoRA路径
+if [ "$RUN_MODE" = "baseline" ]; then
+    MODEL_TAG="${BASE_MODEL}"
+    LORA_ARG=""
+    LORA_DISPLAY="无（预训练基线）"
+elif [ "$RUN_MODE" = "finetuned" ]; then
+    MODEL_TAG="${BASE_MODEL}_finetuned"
+    LORA_ARG="-l ${LORA_MODEL_PATH}"
+    LORA_DISPLAY="${LORA_MODEL_PATH}"
+else
+    echo "错误: 未知的运行模式 '$RUN_MODE'"
+    echo "使用方法: bash run_rq1_finetuned.sh [baseline|finetuned]"
+    exit 1
+fi
 
 # ==================== 函数定义 ====================
 
@@ -59,18 +80,22 @@ print_warning() {
 
 # 检查模型是否存在
 check_model() {
-    if [ ! -d "$LORA_MODEL_PATH" ]; then
-        print_error "LoRA模型不存在: $LORA_MODEL_PATH"
-        print_info "请先运行微调训练或修改LORA_MODEL_PATH变量"
-        exit 1
+    if [ "$RUN_MODE" = "finetuned" ]; then
+        if [ ! -d "$LORA_MODEL_PATH" ]; then
+            print_error "LoRA模型不存在: $LORA_MODEL_PATH"
+            print_info "请先运行微调训练或修改LORA_MODEL_PATH变量"
+            exit 1
+        fi
+        
+        if [ ! -f "$LORA_MODEL_PATH/adapter_config.json" ]; then
+            print_error "LoRA模型配置文件不存在: $LORA_MODEL_PATH/adapter_config.json"
+            exit 1
+        fi
+        
+        print_success "找到微调模型: $LORA_MODEL_PATH"
+    else
+        print_success "使用预训练基线模型: $BASE_MODEL"
     fi
-    
-    if [ ! -f "$LORA_MODEL_PATH/adapter_config.json" ]; then
-        print_error "LoRA模型配置文件不存在: $LORA_MODEL_PATH/adapter_config.json"
-        exit 1
-    fi
-    
-    print_success "找到微调模型: $LORA_MODEL_PATH"
 }
 
 # 检查数据集是否存在
@@ -128,7 +153,7 @@ run_evaluation() {
             PYTHONPATH=${PROJECT_ROOT} python3 run_fuzzer.py \
                 -s ${SEED} \
                 -m ${BASE_MODEL} \
-                -l ${LORA_MODEL_PATH} \
+                ${LORA_ARG} \
                 -d ${data_path} \
                 -r True
         " && break
@@ -165,14 +190,15 @@ generate_report() {
     print_info "生成评估报告"
     print_info "=========================================="
     
-    local report_file="${PROJECT_ROOT}/results/rq1_finetuned_report_${SEED}.txt"
+    local report_file="${PROJECT_ROOT}/training/logs/rq1_${RUN_MODE}_report_${SEED}.txt"
     
     {
-        echo "RQ1 微调模型评估报告"
-        echo "===================="
+        echo "RQ1 OpenVLA评估报告 - ${RUN_MODE^^} 模式"
+        echo "=========================================="
         echo ""
-        echo "模型: ${MODEL_TAG}"
-        echo "LoRA路径: ${LORA_MODEL_PATH}"
+        echo "运行模式: ${RUN_MODE}"
+        echo "模型标识: ${MODEL_TAG}"
+        echo "LoRA路径: ${LORA_DISPLAY}"
         echo "随机种子: ${SEED}"
         echo "评估时间: $(date)"
         echo ""
@@ -214,11 +240,12 @@ generate_report() {
 
 main() {
     print_info "=========================================="
-    print_info "RQ1 微调模型评估"
+    print_info "RQ1 OpenVLA评估 - ${RUN_MODE^^} 模式"
     print_info "=========================================="
     print_info "项目根目录: ${PROJECT_ROOT}"
-    print_info "微调模型: ${LORA_MODEL_PATH}"
+    print_info "运行模式: ${RUN_MODE}"
     print_info "基础模型: ${BASE_MODEL}"
+    print_info "LoRA路径: ${LORA_DISPLAY}"
     print_info "随机种子: ${SEED}"
     print_info "=========================================="
     

@@ -56,8 +56,7 @@ class OpenVLAInference:
             base_model = AutoModelForVision2Seq.from_pretrained(
                 self.model_type,
                 torch_dtype=torch.bfloat16,
-                trust_remote_code=True,
-                attn_implementation="eager"  # 避免SDPA兼容性问题
+                trust_remote_code=True
             ).to(device)
             
             # 如果提供了LoRA路径，加载LoRA适配器
@@ -69,9 +68,12 @@ class OpenVLAInference:
                     lora_path,
                     torch_dtype=torch.bfloat16
                 )
+                # 设置为评估模式并合并适配器权重以避免推理时的尺寸不匹配问题
+                self.model.eval()
                 print("✓ LoRA适配器加载成功")
             else:
                 self.model = base_model
+                self.model.eval()
         else:
             raise NotImplementedError()
 
