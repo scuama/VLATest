@@ -30,7 +30,7 @@ def run_maniskill2_eval_single_episode(
     obs_camera_name=None,
     control_freq=3,
     sim_freq=513,
-    max_episode_steps=80,
+    max_episode_steps=40,  # 修改为40步，可根据需要调整
     instruction=None,
     enable_raytracing=False,
     additional_env_save_tags=None,

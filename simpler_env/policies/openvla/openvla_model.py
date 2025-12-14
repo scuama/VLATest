@@ -28,7 +28,8 @@ class OpenVLAInference:
         image_size: int = 224,
         action_scale: float = 1.0,
         init_rng: int = 0,
-        device: str = "cuda:0",
+        device: str = "cpu",
+
         lora_path: Optional[str] = None  # 新增：LoRA适配器路径
     ) -> None:
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -53,11 +54,13 @@ class OpenVLAInference:
             self.tokenizer = AutoProcessor.from_pretrained(self.model_type, trust_remote_code=True)
             
             # 加载基础模型
+            self.torch_dtype = torch.bfloat16 if "cuda" in device else torch.float32
             base_model = AutoModelForVision2Seq.from_pretrained(
                 self.model_type,
-                torch_dtype=torch.bfloat16,
+                torch_dtype=self.torch_dtype,
                 trust_remote_code=True
             ).to(device)
+
             
             # 如果提供了LoRA路径，加载LoRA适配器
             if lora_path is not None:
@@ -66,7 +69,7 @@ class OpenVLAInference:
                 self.model = PeftModel.from_pretrained(
                     base_model,
                     lora_path,
-                    torch_dtype=torch.bfloat16
+                    torch_dtype=self.torch_dtype
                 )
                 # 设置为评估模式并合并适配器权重以避免推理时的尺寸不匹配问题
                 self.model.eval()
@@ -165,12 +168,12 @@ class OpenVLAInference:
 
         # prompt = f"In: What action should the robot take to {task_description}?\nOut:"
         prompt = self.task_description
-
+        print(f"promot: {prompt}")
         assert image.dtype == np.uint8
         self._add_image_to_history(self._resize_image(image))
 
         image: Image.Image = Image.fromarray(image)
-        inputs = self.tokenizer(prompt, image).to(self.device, dtype=torch.bfloat16)
+        inputs = self.tokenizer(prompt, image).to(self.device, dtype=self.torch_dtype)
         raw_actions = self.model.predict_action(**inputs, unnorm_key=self.dataset_id, do_sample=False)
         if self.action_ensemble:
             raw_actions = self.action_ensembler.ensemble_action(raw_actions)

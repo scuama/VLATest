@@ -82,7 +82,7 @@ ENVIRONMENT_MAP = {
     "google_robot_pick_customizable": ("GraspSingleCustomizable-v0", {}),
     "google_robot_pick_customizable_ycb": ("GraspSingleCustomizableYCB-v0", {}),
     "google_robot_pick_customizable_no_overlay": ("GraspSingleCustomizableNoOverlay-v0", {}),
-    "google_robot_move_near_customizable": ("MoveNearCustomizable-v0", {}),
+    "google_robot_move_near_customizable": ("MoveNearCustomizable-v0", {"prepackaged_config": True}),
     "google_robot_move_near_customizable_ycb": ("MoveNearCustomizableYCB-v0", {}),
     "google_robot_move_near_customizable_no_overlay": ("MoveNearCustomizableNoOverlay-v0", {}),
     "widowx_put_on_customizable": ("PutOnCustomizable-v0", {}),
@@ -98,6 +98,8 @@ def make(task_name):
     """Creates simulated eval environment from task name."""
     assert task_name in ENVIRONMENTS, f"Task {task_name} is not supported. Environments: \n {ENVIRONMENTS}"
     env_name, kwargs = ENVIRONMENT_MAP[task_name]
-    kwargs["prepackaged_config"] = True
+    # 注释掉强制设置，允许 ENVIRONMENT_MAP 中的配置生效
+    # if "prepackaged_config" not in kwargs:
+    #     kwargs["prepackaged_config"] = True
     env = gym.make(env_name, obs_mode="rgbd", **kwargs)
     return env

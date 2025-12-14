@@ -5,7 +5,8 @@ import os
 import jax
 import matplotlib.pyplot as plt
 import numpy as np
-from .model.octo_model import OctoModel
+from .octo_model import OctoModel
+
 import tensorflow as tf
 from transformers import AutoTokenizer
 from transforms3d.euler import euler2axangle

@@ -1,0 +1,41 @@
+{
+  "model_ids": [
+    "green_cube_3cm",
+    "opened_pepsi_can"
+  ],
+  "obj_init_options": {
+    "green_cube_3cm": {
+      "init_xy": [
+        -0.46678083726881214,
+        0.018817338338887792
+      ],
+      "init_rot_quat": [
+        0.7071067811865476,
+        0.7071067811865475,
+        0.0,
+        0.0
+      ]
+    },
+    "opened_pepsi_can": {
+      "init_xy": [
+        -0.14003127645153535,
+        0.22913630288184242
+      ],
+      "init_rot_quat": [
+        0.7071067811865476,
+        0.7071067811865475,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "source_obj_id": 1,
+  "target_obj_id": 0,
+  "max_episode_steps": 50,
+  "robot_init_options": {
+    "init_xy": [
+      0.27649530853226967,
+      0.21287044543227635
+    ]
+  }
+}

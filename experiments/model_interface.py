@@ -7,6 +7,7 @@ Time   : 7/19/24
 import os
 import numpy as np
 import simpler_env
+import gym
 from simpler_env.utils.env.observation_utils import get_image_from_maniskill2_obs_dict
 import sapien.core as sapien
 
@@ -71,6 +72,11 @@ class VLAInterface:
 
     def run_interface(self, seed=None, options=None):
         env = simpler_env.make(self.task)
+        # Get max_steps from options but DON'T use TimeLimit wrapper
+        max_steps = None
+        if options is not None and "max_episode_steps" in options:
+            max_steps = int(options.get("max_episode_steps"))
+
         obs, reset_info = env.reset(seed=seed, options=options)
         # Handle potential wrapper - try direct method first, fallback to unwrapped
         if hasattr(env, 'get_language_instruction'):
@@ -86,9 +92,22 @@ class VLAInterface:
         predicted_terminated, success, truncated = False, False, False
         timestep = 0
         episode_stats = {}
+        actions = []  # updated by zeqin: collect actions for saving/replay
         while not (predicted_terminated or truncated):
+            # Check manual step limit
+            if max_steps is not None and timestep >= max_steps:
+                truncated = True
+                break
+            
             # step the model; "raw_action" is raw model action output; "action" is the processed action to be sent into maniskill env
             raw_action, action = self.model.step(image)
+            # updated by zeqin: save concatenated action vector used for env.step
+            try:
+                action_vector = np.concatenate([action["world_vector"], action["rot_axangle"], action["gripper"]])
+            except Exception:
+                action_vector = None
+            actions.append(action_vector)
+            
             predicted_terminated = bool(action["terminate_episode"][0] > 0)
             obs, reward, success, truncated, info = env.step(
                 np.concatenate([action["world_vector"], action["rot_axangle"], action["gripper"]])
@@ -103,12 +122,82 @@ class VLAInterface:
         print(f"Episode success: {success}")
         env.close()
         del env
-        return images, episode_stats
+        return images, episode_stats, actions  # updated by zeqin: return actions for external saving
+    
+    
+    def run_interfaceWithPromot(self, seed=None, options=None,promot = None):
+        env = simpler_env.make(self.task)
+        
+        # Get max_steps from options but DON'T use TimeLimit wrapper
+        max_steps = None
+        if options is not None and "max_episode_steps" in options:
+            max_steps = int(options.get("max_episode_steps"))
+        
+        obs, reset_info = env.reset(seed=seed, options=options)
+        # Handle potential wrapper - try direct method first, fallback to unwrapped
+        if hasattr(env, 'get_language_instruction'):
+            original_instruction = env.get_language_instruction()
+        else:
+            original_instruction = env.unwrapped.get_language_instruction()
+        
+        # Support custom instruction templates
+        # If template contains {instruction}, replace it; otherwise use template as-is
+        if "{instruction}" in promot["template"]:
+            final_instruction = promot["template"].format(instruction=original_instruction)
+        else:
+            final_instruction = promot["template"]
+        
+        self.model.reset(final_instruction)
+        print(f"Original: {original_instruction}")
+        print(f"Final instruction: {final_instruction}")
+        print("Reset info", reset_info)
+
+        image = get_image_from_maniskill2_obs_dict(env, obs)  # np.ndarray of shape (H, W, 3), uint8
+        images = [image]
+        predicted_terminated, success, truncated = False, False, False
+        timestep = 0
+        episode_stats = {}
+        actions = []  # updated by zeqin: collect actions for saving/replay
+        while not (predicted_terminated or truncated):
+            # Check manual step limit
+            if max_steps is not None and timestep >= max_steps:
+                truncated = True
+                break
+            
+            # step the model; "raw_action" is raw model action output; "action" is the processed action to be sent into maniskill env
+            raw_action, action = self.model.step(image)
+            # updated by zeqin: save concatenated action vector used for env.step
+            try:
+                action_vector = np.concatenate([action["world_vector"], action["rot_axangle"], action["gripper"]])
+            except Exception:
+                action_vector = None
+            actions.append(action_vector)
+            
+            predicted_terminated = bool(action["terminate_episode"][0] > 0)
+            obs, reward, success, truncated, info = env.step(
+                np.concatenate([action["world_vector"], action["rot_axangle"], action["gripper"]])
+            )
+            print(timestep, info)
+            episode_stats[timestep] = info
+            # update image observation
+            image = get_image_from_maniskill2_obs_dict(env, obs)
+            images.append(image)
+            timestep += 1
+
+        print(f"Episode success: {success}")
+        env.close()
+        del env
+        return images, episode_stats, actions  # updated by zeqin: return actions for external saving
 
 
 class VLAInterfaceLM(VLAInterface):
     def run_interface(self, seed=None, options=None, instruction=None):
         env = simpler_env.make(self.task)
+        # Get max_steps from options but DON'T use TimeLimit wrapper
+        max_steps = None
+        if options is not None and "max_episode_steps" in options:
+            max_steps = int(options.get("max_episode_steps"))
+
         obs, reset_info = env.reset(seed=seed, options=options)
         if not instruction:
             instruction = env.get_language_instruction()
@@ -121,9 +210,21 @@ class VLAInterfaceLM(VLAInterface):
         predicted_terminated, success, truncated = False, False, False
         timestep = 0
         episode_stats = {}
+        actions = []  # updated by zeqin: collect actions for saving/replay
         while not (predicted_terminated or truncated):
+            # Check manual step limit
+            if max_steps is not None and timestep >= max_steps:
+                truncated = True
+                break
+            
             # step the model; "raw_action" is raw model action output; "action" is the processed action to be sent into maniskill env
             raw_action, action = self.model.step(image)
+            # updated by zeqin: save concatenated action vector used for env.step
+            try:
+                action_vector = np.concatenate([action["world_vector"], action["rot_axangle"], action["gripper"]])
+            except Exception:
+                action_vector = None
+            actions.append(action_vector)
             predicted_terminated = bool(action["terminate_episode"][0] > 0)
             obs, reward, success, truncated, info = env.step(
                 np.concatenate([action["world_vector"], action["rot_axangle"], action["gripper"]])
@@ -138,7 +239,7 @@ class VLAInterfaceLM(VLAInterface):
         print(f"Episode success: {success}")
         env.close()
         del env
-        return images, episode_stats
+        return images, episode_stats, actions  # updated by zeqin: return actions for external saving
 
 
 if __name__ == '__main__':

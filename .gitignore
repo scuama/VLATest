@@ -40,3 +40,10 @@ models
 .codebuddy
 
 ManiSkill2_real2sim
+newresult
+data
+move_optimization/optimized_configs
+inference_results
+feedback
+newdata
+newresult_v2

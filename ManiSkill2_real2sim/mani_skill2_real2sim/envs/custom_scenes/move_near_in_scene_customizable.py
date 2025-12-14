@@ -221,12 +221,23 @@ class MoveNearInSceneCustomizableEnv(CustomSceneEnv):
 
     def _additional_prepackaged_config_reset(self, options):
         # use prepackaged robot evaluation configs under visual matching setup
-        options["robot_init_options"] = {
-            "init_xy": [0.35, 0.21],
-            "init_rot_quat": (
+        # 只在没有显式指定 robot_init_options 时才使用默认值
+        if "robot_init_options" not in options:
+            options["robot_init_options"] = {
+                "init_xy": [0.35, 0.21],
+                "init_rot_quat": (
+                        sapien.Pose(q=euler2quat(0, 0, -0.09)) * sapien.Pose(q=[0, 0, 0, 1])
+                ).q,
+            }
+        else:
+            # 如果用户提供了 robot_init_options，确保它包含必要的字段
+            if "init_xy" not in options["robot_init_options"]:
+                options["robot_init_options"]["init_xy"] = [0.35, 0.21]
+            if "init_rot_quat" not in options["robot_init_options"]:
+                options["robot_init_options"]["init_rot_quat"] = (
                     sapien.Pose(q=euler2quat(0, 0, -0.09)) * sapien.Pose(q=[0, 0, 0, 1])
-            ).q,
-        }
+                ).q
+        
         new_urdf_version = self._episode_rng.choice(
             [
                 "",

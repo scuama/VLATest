@@ -34,11 +34,13 @@ BASE_MODEL="openvla-7b"
 SEED=2024
 
 # RQ1测试数据集
+# 注意：为避免GPU显存不足，一次只运行一个数据集
+# 完成后可以手动修改这里运行其他数据集
 DATASETS=(
     "t-grasp_n-1000_o-m3_s-2498586606.json"
-    "t-move_n-1000_o-m3_s-2263834374.json"
-    "t-put-on_n-1000_o-m3_s-2593734741.json"
-    "t-put-in_n-1000_o-m3_s-2905191776.json"
+    # "t-move_n-1000_o-m3_s-2263834374.json"
+    # "t-put-on_n-1000_o-m3_s-2593734741.json"
+    # "t-put-in_n-1000_o-m3_s-2905191776.json"
 )
 
 # 超时时间（每个数据集）
@@ -140,38 +142,31 @@ run_evaluation() {
         fi
     fi
     
-    # 运行评估（带超时和重试机制）
-    local max_retries=3
-    local retry_count=0
+    # 运行评估（不使用重试机制，避免GPU显存问题）
+    print_info "开始运行评估任务..."
     
-    while [ $retry_count -lt $max_retries ]; do
-        print_info "尝试 $((retry_count + 1))/${max_retries}..."
-        
-        # 运行Python脚本
-        cd "${PROJECT_ROOT}/experiments"
-        timeout "${TIMEOUT_DURATION}" bash -c "
-            PYTHONPATH=${PROJECT_ROOT} python3 run_fuzzer.py \
-                -s ${SEED} \
-                -m ${BASE_MODEL} \
-                ${LORA_ARG} \
-                -d ${data_path} \
-                -r True
-        " && break
-        
-        # 检查退出状态
-        local exit_code=$?
-        if [ $exit_code -eq 124 ]; then
-            print_warning "任务超时，正在重试..."
-        elif [ $exit_code -ne 0 ]; then
-            print_warning "任务失败（退出码: ${exit_code}），正在重试..."
-        fi
-        
-        # 清理可能卡住的进程
-        pkill -f "run_fuzzer.py" 2>/dev/null || true
-        sleep 5
-        
-        ((retry_count++))
-    done
+    # 运行Python脚本
+    cd "${PROJECT_ROOT}/experiments"
+    timeout "${TIMEOUT_DURATION}" bash -c "
+        PYTHONPATH=${PROJECT_ROOT} python3 run_fuzzer.py \
+            -s ${SEED} \
+            -m ${BASE_MODEL} \
+            ${LORA_ARG} \
+            -d ${data_path} \
+            -r True
+    "
+    
+    # 检查退出状态
+    local exit_code=$?
+    if [ $exit_code -eq 124 ]; then
+        print_error "任务超时（超过 ${TIMEOUT_DURATION}）"
+        return 1
+    elif [ $exit_code -ne 0 ]; then
+        print_error "任务失败（退出码: ${exit_code}）"
+        return 1
+    fi
+    
+    print_success "任务执行完成"
     
     # 检查最终结果
     local final_log_count=$(find "$output_dir" -name 'log.json' 2>/dev/null | wc -l)
