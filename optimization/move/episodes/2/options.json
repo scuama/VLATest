@@ -1,0 +1,35 @@
+{
+  "model_ids": [
+    "opened_coke_can",
+    "bridge_carrot_generated_modified"
+  ],
+  "obj_init_options": {
+    "opened_coke_can": {
+      "init_xy": [
+        -0.2392104328575431,
+        0.22628266281885462
+      ],
+      "init_rot_quat": [
+        0.7071067811865476,
+        0.7071067811865475,
+        0.0,
+        0.0
+      ]
+    },
+    "bridge_carrot_generated_modified": {
+      "init_xy": [
+        -0.1275964758008421,
+        0.005717838587662927
+      ],
+      "init_rot_quat": [
+        0.7319440976418161,
+        0.0,
+        0.0,
+        0.6813646879075166
+      ]
+    }
+  },
+  "source_obj_id": 0,
+  "target_obj_id": 1,
+  "max_episode_steps": 50
+}

@@ -5,6 +5,7 @@
 """
 
 import os
+import sys
 import json
 import random
 import subprocess
@@ -32,22 +33,25 @@ COARSE_FINE_RATIO = 0.5
 os.makedirs(OPTIMIZED_CONFIGS_DIR, exist_ok=True)
 
 # 机械臂方向定义（坐标系：+y向上，-y向下，-x向左，+x向右）
-# 粗搜索范围：x和y轴统一控制在±0.05米以内
+# 粗搜索范围：缩小到±2cm以减少视角变化
 DIRECTION_OFFSETS = {
-    "left": {"x": (-0.05, -0.01), "y": (-0.05, 0.05)},
-    "right": {"x": (0.01, 0.05), "y": (-0.05, 0.05)},
-    "up": {"x": (-0.05, 0.05), "y": (0.01, 0.05)},
-    "down": {"x": (-0.05, 0.05), "y": (-0.05, -0.01)},
-    "left-up": {"x": (-0.05, -0.01), "y": (0.01, 0.05)},
-    "left-down": {"x": (-0.05, -0.01), "y": (-0.05, -0.01)},
-    "right-up": {"x": (0.01, 0.05), "y": (0.01, 0.05)},
-    "right-down": {"x": (0.01, 0.05), "y": (-0.05, -0.01)},
+    "left": {"x": (-0.02, -0.005), "y": (-0.02, 0.02)},
+    "right": {"x": (0.005, 0.02), "y": (-0.02, 0.02)},
+    "up": {"x": (-0.02, 0.02), "y": (0.005, 0.02)},
+    "down": {"x": (-0.02, 0.02), "y": (-0.02, -0.005)},
+    "left-up": {"x": (-0.02, -0.005), "y": (0.005, 0.02)},
+    "left-down": {"x": (-0.02, -0.005), "y": (-0.02, -0.005)},
+    "right-up": {"x": (0.005, 0.02), "y": (0.005, 0.02)},
+    "right-down": {"x": (0.005, 0.02), "y": (-0.02, -0.005)},
 }
 
-# 精细搜索范围（也略微增大）
-FINE_SEARCH_RANGE = {"x": (-0.01, 0.01), "y": (-0.01, 0.01)}
+# 精细搜索范围（缩小到±5mm以减少视角变化）
+FINE_SEARCH_RANGE = {"x": (-0.005, 0.005), "y": (-0.005, 0.005)}
 ROBOT_X_RANGE = (-0.3, 0.3)
 ROBOT_Y_RANGE = (-0.3, 0.3)
+
+# 图像一致性阈值
+IMAGE_SIMILARITY_THRESHOLD = 0.85  # SSIM相似度阈值（0-1）
 
 
 # ==================== 工具函数 ====================
@@ -60,6 +64,105 @@ def get_safe_default_rot_quat():
     """
     quat = (sapien.Pose(q=euler2quat(0, 0, -0.09)) * sapien.Pose(q=[0, 0, 0, 1])).q
     return quat
+
+
+def compare_images_ssim(img1_path, img2_path):
+    """
+    使用SSIM (结构相似性指数) 比较两张图像的相似度
+    
+    Returns:
+        float: 相似度分数 (0-1)，1表示完全相同
+        None: 如果图像加载失败
+    """
+    try:
+        from skimage.metrics import structural_similarity as ssim
+        import cv2
+        
+        # 读取图像
+        img1 = cv2.imread(img1_path)
+        img2 = cv2.imread(img2_path)
+        
+        if img1 is None or img2 is None:
+            return None
+        
+        # 转换为灰度图
+        gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+        gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+        
+        # 确保尺寸一致
+        if gray1.shape != gray2.shape:
+            gray2 = cv2.resize(gray2, (gray1.shape[1], gray1.shape[0]))
+        
+        # 计算SSIM
+        score = ssim(gray1, gray2)
+        return score
+    except Exception as e:
+        print(f"   ⚠️  图像比较失败: {str(e)[:50]}")
+        return None
+
+
+def verify_image_consistency(original_episode_dir, optimized_episode_dir, threshold=IMAGE_SIMILARITY_THRESHOLD):
+    """
+    验证重放后的图像与原始图像是否一致（检查视角是否剧烈变化）
+    
+    Args:
+        original_episode_dir: 原始episode目录
+        optimized_episode_dir: 优化后的episode目录
+        threshold: SSIM相似度阈值（默认0.85）
+    
+    Returns:
+        tuple: (是否一致, 相似度分数, 详细信息)
+    """
+    try:
+        # 获取原始图像目录 - 支持多种可能的路径
+        original_images_dir = os.path.join(original_episode_dir, "images")
+        
+        # 如果episode目录下没有images，尝试在上层的images目录查找
+        if not os.path.exists(original_images_dir):
+            # 获取episode_id（例如：从 .../openvla-7b_2024/37 中提取 37）
+            episode_id = os.path.basename(original_episode_dir)
+            base_results_dir = os.path.dirname(os.path.dirname(original_episode_dir))  # 回到results目录
+            alternative_images_dir = os.path.join(base_results_dir, "images", "openvla-7b_2024", episode_id)
+            
+            if os.path.exists(alternative_images_dir):
+                original_images_dir = alternative_images_dir
+        
+        replay_images_dir = os.path.join(optimized_episode_dir, "replay_images")
+        
+        if not os.path.exists(original_images_dir):
+            return True, None, "原始图像目录不存在，跳过验证"
+        
+        if not os.path.exists(replay_images_dir):
+            return False, 0.0, "重放图像目录不存在"
+        
+        # 获取第一帧图像（初始状态最关键）
+        original_images = sorted([f for f in os.listdir(original_images_dir) if f.endswith(('.jpg', '.png'))])
+        replay_images = sorted([f for f in os.listdir(replay_images_dir) if f.endswith(('.jpg', '.png'))])
+        
+        if not original_images or not replay_images:
+            return True, None, "图像文件缺失，跳过验证"
+        
+        # 比较前3帧的平均相似度
+        similarities = []
+        for i in range(min(3, len(original_images), len(replay_images))):
+            orig_path = os.path.join(original_images_dir, original_images[i])
+            replay_path = os.path.join(replay_images_dir, replay_images[i])
+            
+            score = compare_images_ssim(orig_path, replay_path)
+            if score is not None:
+                similarities.append(score)
+        
+        if not similarities:
+            return True, None, "无法计算相似度"
+        
+        avg_similarity = np.mean(similarities)
+        is_consistent = avg_similarity >= threshold
+        
+        detail = f"SSIM={avg_similarity:.3f} (阈值={threshold})"
+        return is_consistent, avg_similarity, detail
+        
+    except Exception as e:
+        return True, None, f"验证异常: {str(e)[:50]}"
 
 
 def copy_episode_to_optimized_dir(episode_id, original_base_dir):
@@ -193,7 +296,7 @@ def run_replay_subprocess(episode_dir, task_name):
     """使用子进程重放（避免环境崩溃影响主进程）"""
     try:
         cmd = [
-            'python3', REPLAY_SCRIPT,
+            sys.executable, REPLAY_SCRIPT,  # 使用当前Python解释器
             '--episode_dir', episode_dir,
             '--task', task_name
             # 不指定 render_every，使用默认值 1（每步都渲染）
@@ -391,7 +494,8 @@ def check_grasp_success(episode_dir, task_type, min_steps=MIN_CONSECUTIVE_GRASP_
 
 
 def run_single_attempt(attempt, total_attempts, stage_name, episode_dir, task_name, 
-                      task_type, original_options, x_range, y_range, original_robot_xy):
+                      task_type, original_options, x_range, y_range, original_robot_xy,
+                      original_episode_dir=None, verify_images=True):
     """执行单次尝试"""
     print(f"\n🔄 [{stage_name}] 尝试 {attempt}/{total_attempts}")
     
@@ -412,6 +516,20 @@ def run_single_attempt(attempt, total_attempts, stage_name, episode_dir, task_na
     
     print("✅")
     
+    # 图像一致性验证
+    image_consistent = True
+    image_similarity = None
+    if verify_images and original_episode_dir:
+        print("   📸 验证图像一致性...", end=" ", flush=True)
+        is_consistent, similarity, detail = verify_image_consistency(original_episode_dir, episode_dir)
+        image_consistent = is_consistent
+        image_similarity = similarity
+        
+        if is_consistent:
+            print(f"✅ {detail}")
+        else:
+            print(f"⚠️  视角变化过大 {detail}")
+    
     print("   🔍 检查抓取...", end=" ", flush=True)
     is_success, grasp_steps, details = check_grasp_success(episode_dir, task_type)
     
@@ -429,6 +547,8 @@ def run_single_attempt(attempt, total_attempts, stage_name, episode_dir, task_na
         'success': is_success,
         'grasp_steps': grasp_steps,
         'details': details,
+        'image_consistent': image_consistent,
+        'image_similarity': image_similarity,
     }
 
 
@@ -439,6 +559,8 @@ def process_single_episode(episode_id, base_dir, direction, task, attempts, min_
     print(f"\n📋 准备处理 Episode: {episode_id}")
     print(f"📂 原始目录: {base_dir}")
     
+    # 保存原始episode目录路径
+    original_episode_dir = os.path.join(base_dir, episode_id)
     optimized_episode_dir = copy_episode_to_optimized_dir(episode_id, base_dir)
     
     if not os.path.exists(optimized_episode_dir):
@@ -555,7 +677,9 @@ def process_single_episode(episode_id, base_dir, direction, task, attempts, min_
                 optimized_episode_dir, task_name, task,
                 original_options,
                 direction_offset['x'], direction_offset['y'],
-                robot_xy
+                robot_xy,
+                original_episode_dir=original_episode_dir,  # 传入原始目录用于图像对比
+                verify_images=True
             )
             if result:
                 all_attempts.append(result)

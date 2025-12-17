@@ -1,0 +1,852 @@
+{
+  "0": {
+    "elapsed_steps": 1,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "1": {
+    "elapsed_steps": 2,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "2": {
+    "elapsed_steps": 3,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "3": {
+    "elapsed_steps": 4,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "4": {
+    "elapsed_steps": 5,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "5": {
+    "elapsed_steps": 6,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "6": {
+    "elapsed_steps": 7,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "7": {
+    "elapsed_steps": 8,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "8": {
+    "elapsed_steps": 9,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "9": {
+    "elapsed_steps": 10,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "10": {
+    "elapsed_steps": 11,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "11": {
+    "elapsed_steps": 12,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "12": {
+    "elapsed_steps": 13,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "13": {
+    "elapsed_steps": 14,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "14": {
+    "elapsed_steps": 15,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "15": {
+    "elapsed_steps": 16,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "16": {
+    "elapsed_steps": 17,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "17": {
+    "elapsed_steps": 18,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "18": {
+    "elapsed_steps": 19,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "19": {
+    "elapsed_steps": 20,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "20": {
+    "elapsed_steps": 21,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "21": {
+    "elapsed_steps": 22,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "22": {
+    "elapsed_steps": 23,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "23": {
+    "elapsed_steps": 24,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "24": {
+    "elapsed_steps": 25,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "25": {
+    "elapsed_steps": 26,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "26": {
+    "elapsed_steps": 27,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "27": {
+    "elapsed_steps": 28,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "28": {
+    "elapsed_steps": 29,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "29": {
+    "elapsed_steps": 30,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "30": {
+    "elapsed_steps": 31,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "31": {
+    "elapsed_steps": 32,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "32": {
+    "elapsed_steps": 33,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": false,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "33": {
+    "elapsed_steps": 34,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "34": {
+    "elapsed_steps": 35,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": true
+  },
+  "35": {
+    "elapsed_steps": 36,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": true
+  },
+  "36": {
+    "elapsed_steps": 37,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": true
+  },
+  "37": {
+    "elapsed_steps": 38,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": true
+  },
+  "38": {
+    "elapsed_steps": 39,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": true
+  },
+  "39": {
+    "elapsed_steps": 40,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": true
+  },
+  "40": {
+    "elapsed_steps": 41,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": true
+  },
+  "41": {
+    "elapsed_steps": 42,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "42": {
+    "elapsed_steps": 43,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "43": {
+    "elapsed_steps": 44,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "44": {
+    "elapsed_steps": 45,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "45": {
+    "elapsed_steps": 46,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "46": {
+    "elapsed_steps": 47,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "47": {
+    "elapsed_steps": 48,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "48": {
+    "elapsed_steps": 49,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  },
+  "49": {
+    "elapsed_steps": 50,
+    "all_obj_keep_height": true,
+    "moved_correct_obj": true,
+    "moved_wrong_obj": false,
+    "near_tgt_obj": false,
+    "is_closest_to_tgt": true,
+    "success": false,
+    "episode_stats": {
+      "all_obj_keep_height": true,
+      "moved_correct_obj": true,
+      "moved_wrong_obj": false,
+      "near_tgt_obj": false,
+      "is_closest_to_tgt": true
+    },
+    "is_src_obj_grasped": false
+  }
+}

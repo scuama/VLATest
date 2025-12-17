@@ -1,0 +1,17 @@
+{
+  "base_dir": "results/t-move_n-100_o-0_s-3225323079/openvla-7b_2024",
+  "task": "move",
+  "output_dir": "optimization/collected_data",
+  "max_retry": 2,
+  "min_grasp_steps": 5,
+  "cases": [
+    {"episode_id": "7", "strategy": "optimize_grasp", "direction": "right-up", "attempts": 10},
+    {"episode_id": "13", "strategy": "optimize_grasp", "direction": "right-up", "attempts": 10},
+    {"episode_id": "37", "strategy": "optimize_grasp", "direction": "right-up", "attempts": 10},
+    {"episode_id": "2", "strategy": "move_closer", "attempts": 15},
+    {"episode_id": "8", "strategy": "move_closer", "attempts": 15},
+    {"episode_id": "15", "strategy": "move_closer", "attempts": 15},
+    {"episode_id": "44", "strategy": "replace_object", "objects": ["coke_can"]},
+    {"episode_id": "46", "strategy": "replace_object", "objects": ["coke_can"]}
+  ]
+}

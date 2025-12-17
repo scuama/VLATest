@@ -37,7 +37,7 @@ if __name__ == '__main__':
                         help="VLA model")
     parser.add_argument('-l', '--lora_path', type=str, default=None,
                         help="LoRA adapter path for finetuned OpenVLA model")
-    parser.add_argument('-r', '--resume', type=bool, default=True, help="Resume from where we left.")
+    parser.add_argument('-r', '--resume', action='store_true', default=False, help="Resume from where we left.")
 
     args = parser.parse_args()
 

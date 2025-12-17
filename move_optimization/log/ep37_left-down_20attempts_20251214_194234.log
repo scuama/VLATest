@@ -1,0 +1,156 @@
+nohup: ignoring input
+📂 当前工作目录: /mnt/disk1/decom/VLATest
+🔍 扫描基础目录: /mnt/disk1/decom/VLATest/results/t-move_n-100_o-0_s-3225323079/openvla-7b_2024
+
+📋 准备处理 Episode: 37
+📂 原始目录: /mnt/disk1/decom/VLATest/results/t-move_n-100_o-0_s-3225323079/openvla-7b_2024
+✅ 复制episode配置: /mnt/disk1/decom/VLATest/results/t-move_n-100_o-0_s-3225323079/openvla-7b_2024/37 -> /mnt/disk1/decom/VLATest/move_optimization/optimized_configs/37
+ℹ️  检测到标准结构: opened_pepsi_can.init_xy = [-0.14003127645153535, 0.22913630288184242]
+ℹ️  初始化机械臂位置: [0.0, 0.0]
+
+======================================================================
+🎯 处理 Episode: 37
+📍 优化配置目录: /mnt/disk1/decom/VLATest/move_optimization/optimized_configs/37
+🌟 物体: opened_pepsi_can [-0.1400, 0.2291]
+🤖 机械臂: [0.0000, 0.0000]
+🧭 方向: left-down
+🔢 搜索: 20次（粗搜索10 + 精细搜索10）
+======================================================================
+
+🔍 阶段1: 粗搜索
+
+🔄 [粗搜索] 尝试 1/10
+   🤖 机械臂位置: [-0.0109, -0.0182]
+   📏 偏移: Δx=-0.0109m, Δy=-0.0182m
+   ⏳ 执行重放... 
+   ⚠️  重放脚本返回错误码: -11
+   错误输出: [2025-12-14 19:42:36.354] [svulkan2] [error] GLFW error: X11: The DISPLAY environment variable is missing
+[2025-12-14 19:42:36.354] [svulkan2] [warning] Continue without GLFW.
+
+❌ 重放失败
+
+🔄 [粗搜索] 尝试 2/10
+   🤖 机械臂位置: [-0.0073, -0.0057]
+   📏 偏移: Δx=-0.0073m, Δy=-0.0057m
+   ⏳ 执行重放... ✅
+   📸 验证图像一致性...    ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+✅ 无法计算相似度
+   🔍 检查抓取... ❌ 失败（连续抓取 0 步）
+
+🔄 [粗搜索] 尝试 3/10
+   🤖 机械臂位置: [-0.0056, -0.0132]
+   📏 偏移: Δx=-0.0056m, Δy=-0.0132m
+   ⏳ 执行重放... ✅
+   📸 验证图像一致性...    ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+✅ 无法计算相似度
+   🔍 检查抓取... ❌ 失败（连续抓取 0 步）
+
+🔄 [粗搜索] 尝试 4/10
+   🤖 机械臂位置: [-0.0158, -0.0128]
+   📏 偏移: Δx=-0.0158m, Δy=-0.0128m
+   ⏳ 执行重放... ✅
+   📸 验证图像一致性...    ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+✅ 无法计算相似度
+   🔍 检查抓取... ❌ 失败（连续抓取 0 步）
+
+🔄 [粗搜索] 尝试 5/10
+   🤖 机械臂位置: [-0.0078, -0.0144]
+   📏 偏移: Δx=-0.0078m, Δy=-0.0144m
+   ⏳ 执行重放... ✅
+   📸 验证图像一致性...    ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+✅ 无法计算相似度
+   🔍 检查抓取... ❌ 失败（连续抓取 0 步）
+
+🔄 [粗搜索] 尝试 6/10
+   🤖 机械臂位置: [-0.0057, -0.0142]
+   📏 偏移: Δx=-0.0057m, Δy=-0.0142m
+   ⏳ 执行重放... ✅
+   📸 验证图像一致性...    ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+✅ 无法计算相似度
+   🔍 检查抓取... ❌ 失败（连续抓取 0 步）
+
+🔄 [粗搜索] 尝试 7/10
+   🤖 机械臂位置: [-0.0170, -0.0071]
+   📏 偏移: Δx=-0.0170m, Δy=-0.0071m
+   ⏳ 执行重放... ✅
+   📸 验证图像一致性...    ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+✅ 无法计算相似度
+   🔍 检查抓取... ❌ 失败（连续抓取 0 步）
+
+🔄 [粗搜索] 尝试 8/10
+   🤖 机械臂位置: [-0.0084, -0.0165]
+   📏 偏移: Δx=-0.0084m, Δy=-0.0165m
+   ⏳ 执行重放... ✅
+   📸 验证图像一致性...    ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+✅ 无法计算相似度
+   🔍 检查抓取... ❌ 失败（连续抓取 0 步）
+
+🔄 [粗搜索] 尝试 9/10
+   🤖 机械臂位置: [-0.0160, -0.0073]
+   📏 偏移: Δx=-0.0160m, Δy=-0.0073m
+   ⏳ 执行重放... ✅
+   📸 验证图像一致性...    ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+✅ 无法计算相似度
+   🔍 检查抓取... ❌ 失败（连续抓取 0 步）
+
+🔄 [粗搜索] 尝试 10/10
+   🤖 机械臂位置: [-0.0199, -0.0189]
+   📏 偏移: Δx=-0.0199m, Δy=-0.0189m
+   ⏳ 执行重放... ✅
+   📸 验证图像一致性...    ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+   ⚠️  图像比较失败: No module named 'skimage'
+✅ 无法计算相似度
+   🔍 检查抓取... ❌ 失败（连续抓取 0 步）
+
+📊 阶段1完成！最佳: 0 步
+🔍 阶段2: 精细搜索
+
+🔄 [精细搜索] 尝试 1/10
+   🤖 位置: [-0.0026, -0.0017]
+   ⏳ 执行重放... [2025-12-14 19:44:55.758] [svulkan2] [error] GLFW error: X11: The DISPLAY environment variable is missing
+[2025-12-14 19:44:55.758] [svulkan2] [warning] Continue without GLFW.
+✅
+   🔍 检查抓取... ❌ 失败（连续抓取 0 步）
+
+🔄 [精细搜索] 尝试 2/10
+   🤖 位置: [-0.0033, -0.0050]
+   ⏳ 执行重放... [2025-12-14 19:45:12.272] [svulkan2] [error] GLFW error: X11: The DISPLAY environment variable is missing
+[2025-12-14 19:45:12.272] [svulkan2] [warning] Continue without GLFW.
+✅
+   🔍 检查抓取... ❌ 失败（连续抓取 0 步）
+
+🔄 [精细搜索] 尝试 3/10
+   🤖 位置: [-0.0058, -0.0074]
+   ⏳ 执行重放... [2025-12-14 19:45:28.432] [svulkan2] [error] GLFW error: X11: The DISPLAY environment variable is missing
+[2025-12-14 19:45:28.432] [svulkan2] [warning] Continue without GLFW.
+✅
+   🔍 检查抓取... ❌ 失败（连续抓取 0 步）
+
+🔄 [精细搜索] 尝试 4/10
+   🤖 位置: [-0.0081, -0.0040]
+   ⏳ 执行重放... [2025-12-14 19:45:44.389] [svulkan2] [error] GLFW error: X11: The DISPLAY environment variable is missing
+[2025-12-14 19:45:44.389] [svulkan2] [warning] Continue without GLFW.
+✅
+   🔍 检查抓取... ❌ 失败（连续抓取 0 步）
+
+🔄 [精细搜索] 尝试 5/10
+   🤖 位置: [-0.0120, -0.0065]
+   ⏳ 执行重放... [2025-12-14 19:46:01.393] [svulkan2] [error] GLFW error: X11: The DISPLAY environment variable is missing
+[2025-12-14 19:46:01.393] [svulkan2] [warning] Continue without GLFW.
