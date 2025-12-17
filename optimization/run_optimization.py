@@ -406,29 +406,22 @@ def run_all_inference(optimized_cases, config, task_type):
             with open(options_file, 'r') as f:
                 options = json.load(f)
             
-            # 提取源物体信息
-            model_ids = options.get("model_ids", [])
-            source_obj_id = options.get("source_obj_id", 0)
-            
-            if isinstance(model_ids, list) and 0 <= source_obj_id < len(model_ids):
-                source_model = model_ids[source_obj_id]
-            else:
-                source_model = model_ids[0] if model_ids else "unknown"
-            
-            obj_init_options = options.get("obj_init_options", {})
-            source_init_opts = obj_init_options.get(source_model, {})
-            
-            # 添加到批量数据集
-            batch_dataset[str(idx)] = {
-                "model_id": source_model,
-                "obj_init_options": source_init_opts
-            }
+            # 直接使用完整的 options（包含所有必要字段）
+            batch_dataset[str(idx)] = options
             
             # 如果有 seed，使用第一个场景的 seed
             if "seed" not in batch_dataset and "seed" in options:
                 batch_dataset["seed"] = options["seed"]
             
             episode_mapping[idx] = episode_id
+            
+            # 显示源物体信息（仅用于日志）
+            model_ids = options.get("model_ids", [])
+            source_obj_id = options.get("source_obj_id", 0)
+            if isinstance(model_ids, list) and 0 <= source_obj_id < len(model_ids):
+                source_model = model_ids[source_obj_id]
+            else:
+                source_model = "unknown"
             print(f"   ✅ Episode {episode_id}: {source_model}")
             
         except Exception as e:

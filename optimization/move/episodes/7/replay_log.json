@@ -660,7 +660,7 @@
       "near_tgt_obj": false,
       "is_closest_to_tgt": true
     },
-    "is_src_obj_grasped": true
+    "is_src_obj_grasped": false
   },
   "39": {
     "elapsed_steps": 40,
@@ -677,7 +677,7 @@
       "near_tgt_obj": false,
       "is_closest_to_tgt": true
     },
-    "is_src_obj_grasped": true
+    "is_src_obj_grasped": false
   },
   "40": {
     "elapsed_steps": 41,
@@ -694,7 +694,7 @@
       "near_tgt_obj": false,
       "is_closest_to_tgt": true
     },
-    "is_src_obj_grasped": true
+    "is_src_obj_grasped": false
   },
   "41": {
     "elapsed_steps": 42,

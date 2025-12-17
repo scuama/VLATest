@@ -1,49 +1,109 @@
 {
   "num": 3,
   "0": {
-    "model_id": "redbull_can",
+    "model_ids": [
+      "redbull_can",
+      "yellow_cube_3cm"
+    ],
     "obj_init_options": {
-      "init_xy": [
-        -0.16220928343440696,
-        0.06527463226417529
-      ],
-      "init_rot_quat": [
-        0.7071067811865476,
-        0.7071067811865475,
-        0.0,
-        0.0
-      ]
-    }
+      "redbull_can": {
+        "init_xy": [
+          -0.1647087050769594,
+          0.06205998806467731
+        ],
+        "init_rot_quat": [
+          0.7071067811865476,
+          0.7071067811865475,
+          0.0,
+          0.0
+        ]
+      },
+      "yellow_cube_3cm": {
+        "init_xy": [
+          -0.16850651208170553,
+          0.3271677518747458
+        ],
+        "init_rot_quat": [
+          0.6278956711144978,
+          0.0,
+          0.0,
+          -0.7782975177884576
+        ]
+      }
+    },
+    "source_obj_id": 0,
+    "target_obj_id": 1,
+    "max_episode_steps": 50
   },
   "1": {
-    "model_id": "opened_coke_can",
+    "model_ids": [
+      "opened_coke_can",
+      "bridge_carrot_generated_modified"
+    ],
     "obj_init_options": {
-      "init_xy": [
-        -0.2392104328575431,
-        0.22628266281885462
-      ],
-      "init_rot_quat": [
-        0.7071067811865476,
-        0.7071067811865475,
-        0.0,
-        0.0
-      ]
-    }
+      "opened_coke_can": {
+        "init_xy": [
+          -0.2392104328575431,
+          0.22628266281885462
+        ],
+        "init_rot_quat": [
+          0.7071067811865476,
+          0.7071067811865475,
+          0.0,
+          0.0
+        ]
+      },
+      "bridge_carrot_generated_modified": {
+        "init_xy": [
+          -0.1275964758008421,
+          0.005717838587662927
+        ],
+        "init_rot_quat": [
+          0.7319440976418161,
+          0.0,
+          0.0,
+          0.6813646879075166
+        ]
+      }
+    },
+    "source_obj_id": 0,
+    "target_obj_id": 1,
+    "max_episode_steps": 50
   },
   "2": {
-    "model_id": "coke_can",
+    "model_ids": [
+      "sprite_can",
+      "coke_can"
+    ],
     "obj_init_options": {
-      "init_xy": [
-        -0.4631604484344405,
-        0.37823892274940357
-      ],
-      "init_rot_quat": [
-        0.7071067811865476,
-        0.7071067811865475,
-        0.0,
-        0.0
-      ]
-    }
+      "sprite_can": {
+        "init_xy": [
+          -0.22460405367901481,
+          0.07821284490379209
+        ],
+        "init_rot_quat": [
+          0.7071067811865476,
+          0.7071067811865475,
+          0.0,
+          0.0
+        ]
+      },
+      "coke_can": {
+        "init_xy": [
+          -0.4631604484344405,
+          0.37823892274940357
+        ],
+        "init_rot_quat": [
+          0.7071067811865476,
+          0.7071067811865475,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "source_obj_id": 1,
+    "target_obj_id": 0,
+    "max_episode_steps": 50
   },
   "seed": 0
 }
