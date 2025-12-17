@@ -104,16 +104,13 @@ if __name__ == '__main__':
         image_dir = None
     for idx in tqdm(range(tasks["num"])):
         print("start\n")
-        if idx == 2:
-            print("end\n")
-            break
         if args.resume and os.path.exists(result_dir + f"/{idx}/" + '/log.json'):  # if resume allowed then skip the finished runs.
             print("end\n")
             #continue
         options = tasks[str(idx)]
         # 设置最大步数以加速测试（如果options中没有设置的话）
         if "max_episode_steps" not in options:
-            options["max_episode_steps"] = 10  # 可以根据需要调整这个数值
+            options["max_episode_steps"] = 80  # 可以根据需要调整这个数值
         print("go\n")
         images, episode_stats, actions = vla.run_interfaceWithPromot(seed=random_seed, options=options,promot=PROMPT_TEMPLATES)
         os.makedirs(result_dir + f"/{idx}", exist_ok=True)
