@@ -296,41 +296,61 @@ def run_inference(episode_dir, result_dir, episode_id, task_type, model="openvla
         return False, None
 
 
-def collect_success(result_dir, success_dir, episode_id):
-    """收集成功案例"""
-    result_dir = Path(result_dir)
-    success_dir = Path(success_dir)
-    target_dir = success_dir / episode_id
+def collect_success(source_file_dir, success_base_dir, model_tag, episode_id, seed):
+    """
+    收集成功案例到标准结构
     
-    print(f"\n   📦 收集成功案例...")
+    结构: success_base_dir/openvla-7b_<seed>/<episode_id>/
+          ├── log.json
+          ├── actions.npy
+          ├── actions.json
+          ├── options.json
+          └── images/
+              ├── 0.jpg
+              └── ...
     
-    # 创建目标目录
+    Args:
+        source_file_dir: 源文件目录（包含log.json等的目录）
+        success_base_dir: 成功案例基础目录 (如 optimization/move/success)
+        model_tag: 模型标签 (如 openvla-7b)
+        episode_id: Episode ID（保持原始编号，如 "2", "7", "44"）
+        seed: 随机种子
+    """
+    source_file_dir = Path(source_file_dir)
+    success_base_dir = Path(success_base_dir)
+    
+    # 创建标准结构目录: success/openvla-7b_<seed>/<episode_id>/
+    model_dir_name = f"{model_tag}_{seed}"
+    target_dir = success_base_dir / model_dir_name / episode_id
+    
+    # 如果目录已存在，先删除
     if target_dir.exists():
         shutil.rmtree(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
     
-    # 复制所有文件
+    print(f"\n   📦 收集成功案例 Episode {episode_id}...")
+    
+    # 复制结果文件 (log.json, actions.npy, actions.json, options.json)
     files_copied = 0
-    for item in result_dir.iterdir():
-        if item.is_file():
-            shutil.copy2(item, target_dir / item.name)
+    for filename in ["log.json", "actions.npy", "actions.json", "options.json"]:
+        src_file = source_file_dir / filename
+        if src_file.exists():
+            shutil.copy2(src_file, target_dir / filename)
             files_copied += 1
-        elif item.is_dir() and item.name == "images":
-            shutil.copytree(item, target_dir / "images")
-            files_copied += len(list(item.iterdir()))
     
-    # 保存收集信息
-    collection_info = {
-        "episode_id": episode_id,
-        "collected_at": datetime.now().isoformat(),
-        "source_result_dir": str(result_dir),
-        "files_copied": files_copied
-    }
+    # 复制图片目录到 episode 目录下
+    source_images_dir = source_file_dir / "images"
+    target_images_dir = target_dir / "images"
     
-    with open(target_dir / "collection_info.json", 'w') as f:
-        json.dump(collection_info, f, indent=2)
+    if source_images_dir.exists() and source_images_dir.is_dir():
+        target_images_dir.mkdir(exist_ok=True)
+        for img_file in source_images_dir.iterdir():
+            if img_file.is_file():
+                shutil.copy2(img_file, target_images_dir / img_file.name)
+                files_copied += 1
     
     print(f"   ✅ 成功案例已收集: {target_dir}")
+    print(f"      文件数: {files_copied}")
     return True
 
 
@@ -383,6 +403,9 @@ def run_all_inference(optimized_cases, config, task_type):
     results_dir = task_dir / "results"
     success_dir = task_dir / "success"
     
+    # 获取 model 和 seed 信息（稍后用于收集成功案例）
+    model_tag = config.get('model', 'openvla-7b')
+    
     # 1. 整合所有场景到一个数据集
     print(f"📦 整合数据集...")
     
@@ -390,9 +413,9 @@ def run_all_inference(optimized_cases, config, task_type):
         "num": len(optimized_cases)
     }
     
-    episode_mapping = {}  # episode_id -> dataset_index 的映射
+    episode_list = []  # 记录处理顺序，用于后续映射
     
-    for idx, case_info in enumerate(optimized_cases):
+    for case_info in optimized_cases:
         episode_id = case_info['episode_id']
         work_episode_dir = Path(case_info['episode_dir'])
         
@@ -406,14 +429,14 @@ def run_all_inference(optimized_cases, config, task_type):
             with open(options_file, 'r') as f:
                 options = json.load(f)
             
-            # 直接使用完整的 options（包含所有必要字段）
-            batch_dataset[str(idx)] = options
+            # 使用原始 episode_id 作为键（保持一致性）
+            batch_dataset[episode_id] = options
             
             # 如果有 seed，使用第一个场景的 seed
             if "seed" not in batch_dataset and "seed" in options:
                 batch_dataset["seed"] = options["seed"]
             
-            episode_mapping[idx] = episode_id
+            episode_list.append(episode_id)
             
             # 显示源物体信息（仅用于日志）
             model_ids = options.get("model_ids", [])
@@ -428,6 +451,9 @@ def run_all_inference(optimized_cases, config, task_type):
             print(f"   ❌ Episode {episode_id}: 解析失败 - {e}")
             continue
     
+    # 更新实际数量
+    batch_dataset["num"] = len(episode_list)
+    
     # 设置默认 seed
     if "seed" not in batch_dataset:
         batch_dataset["seed"] = 0
@@ -438,7 +464,7 @@ def run_all_inference(optimized_cases, config, task_type):
         with open(batch_dataset_file, 'w') as f:
             json.dump(batch_dataset, f, indent=2)
         print(f"\n📄 批量数据集已保存: {batch_dataset_file}")
-        print(f"   包含 {len(episode_mapping)} 个场景")
+        print(f"   包含 {len(episode_list)} 个场景: {', '.join(episode_list)}")
     except Exception as e:
         print(f"❌ 保存批量数据集失败: {e}")
         return []
@@ -473,7 +499,9 @@ def run_all_inference(optimized_cases, config, task_type):
         if result.returncode != 0:
             print(f"❌ 批量推理失败")
             if result.stderr:
-                print(f"错误: {result.stderr[:500]}")
+                print(f"错误信息:\n{result.stderr}")
+            if result.stdout:
+                print(f"标准输出:\n{result.stdout}")
             return []
         
         print(f"✅ 批量推理完成")
@@ -487,25 +515,25 @@ def run_all_inference(optimized_cases, config, task_type):
     
     inference_results = []
     
-    for dataset_idx, episode_id in episode_mapping.items():
+    for episode_id in episode_list:
         print(f"\n{'='*70}")
-        print(f"📋 Episode {episode_id} (dataset index: {dataset_idx})")
+        print(f"📋 Episode {episode_id}")
         print(f"{'='*70}")
         
         # 查找对应的 log.json
-        # openVLA.py 生成的结构: batch_result_dir/batch_{task_type}_dataset/openvla-7b_<seed>/{dataset_idx}/log.json
+        # openVLA.py 生成的结构: batch_result_dir/batch_{task_type}_dataset/openvla-7b_<seed>/{episode_id}/log.json
         log_file = None
         
-        # 方式1: 直接查找包含该索引的路径
-        for subdir in batch_result_dir.rglob(f"*/{dataset_idx}/log.json"):
+        # 直接查找包含该 episode_id 的路径
+        for subdir in batch_result_dir.rglob(f"*/{episode_id}/log.json"):
             log_file = subdir
             break
         
-        # 方式2: 如果方式1失败，尝试更宽松的查找
+        # 如果失败，尝试更宽松的查找
         if not log_file:
             for subdir in batch_result_dir.rglob("log.json"):
-                # 检查路径中是否包含正确的索引
-                if f"/{dataset_idx}/" in str(subdir):
+                # 检查路径中是否包含正确的 episode_id
+                if f"/{episode_id}/" in str(subdir):
                     log_file = subdir
                     break
         
@@ -530,20 +558,27 @@ def run_all_inference(optimized_cases, config, task_type):
             result_episode_dir = results_dir / episode_id
             result_episode_dir.mkdir(parents=True, exist_ok=True)
             
-            # 复制 log.json 和相关文件
+            # 复制所有结果文件
             import shutil
-            shutil.copy2(log_file, result_episode_dir / "log.json")
+            source_result_dir = log_file.parent
+            
+            # 复制 log.json, actions.npy, actions.json, options.json
+            for filename in ["log.json", "actions.npy", "actions.json", "options.json"]:
+                src_file = source_result_dir / filename
+                if src_file.exists():
+                    shutil.copy2(src_file, result_episode_dir / filename)
             
             # 复制 images 目录（如果存在）
-            images_dir = log_file.parent / "images"
+            images_dir = source_result_dir / "images"
             if images_dir.exists():
                 target_images_dir = result_episode_dir / "images"
                 if target_images_dir.exists():
                     shutil.rmtree(target_images_dir)
                 shutil.copytree(images_dir, target_images_dir)
             
-            # 收集成功案例
-            collect_success(result_episode_dir, success_dir, episode_id)
+            # 收集成功案例到标准结构
+            seed = batch_dataset.get("seed", 0)
+            collect_success(result_episode_dir, success_dir, model_tag, episode_id, seed)
             
             inference_results.append({
                 'episode_id': episode_id,

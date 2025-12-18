@@ -102,44 +102,57 @@ if __name__ == '__main__':
         os.makedirs(image_dir, exist_ok=True)
     else:
         image_dir = None
+    # 获取所有 episode 键（排除 'num' 和 'seed'）
+    episode_keys = [k for k in tasks.keys() if k not in ['num', 'seed']]
+    
     for idx in tqdm(range(tasks["num"])):
         print("start\n")
-        if args.resume and os.path.exists(result_dir + f"/{idx}/" + '/log.json'):  # if resume allowed then skip the finished runs.
+        
+        # 支持两种键格式：索引键（"0", "1", "2"）或 episode_id 键（"7", "2", "44"）
+        if str(idx) in tasks:
+            episode_key = str(idx)
+        elif idx < len(episode_keys):
+            episode_key = episode_keys[idx]
+        else:
+            print(f"⚠️ 跳过索引 {idx}：找不到对应的配置")
+            continue
+        
+        if args.resume and os.path.exists(result_dir + f"/{episode_key}/" + '/log.json'):  # if resume allowed then skip the finished runs.
             print("end\n")
-            #continue
-        options = tasks[str(idx)]
+            continue
+        options = tasks[episode_key]
         # 设置最大步数以加速测试（如果options中没有设置的话）
         if "max_episode_steps" not in options:
-            options["max_episode_steps"] = 80  # 可以根据需要调整这个数值
+            options["max_episode_steps"] = 20  # 可以根据需要调整这个数值
         print("go\n")
         images, episode_stats, actions = vla.run_interfaceWithPromot(seed=random_seed, options=options,promot=PROMPT_TEMPLATES)
-        os.makedirs(result_dir + f"/{idx}", exist_ok=True)
-        with open(result_dir + f"/{idx}/" + '/log.json', "w") as f:
+        os.makedirs(result_dir + f"/{episode_key}", exist_ok=True)
+        with open(result_dir + f"/{episode_key}/" + '/log.json', "w") as f:
             json.dump(episode_stats, f, cls=StableJSONizer)
         if image_dir:
-            os.makedirs(image_dir + f"/{idx}", exist_ok=True)
+            os.makedirs(image_dir + f"/{episode_key}", exist_ok=True)
             for img_idx in range(len(images)):
                 im = Image.fromarray(images[img_idx])
-                im.save(image_dir + f"/{idx}/" + f'{img_idx}.jpg')
+                im.save(image_dir + f"/{episode_key}/" + f'{img_idx}.jpg')
         # updated by zeqin: save actions and options for later replay in ManiSkill
         try:
             # try saving as numpy file first (allowing object dtype)
-            np.save(result_dir + f"/{idx}/" + 'actions.npy', np.array(actions, dtype=object))
+            np.save(result_dir + f"/{episode_key}/" + 'actions.npy', np.array(actions, dtype=object))
         except Exception:
             pass
         try:
             # also save as json-serializable list of lists (more portable)
             actions_list = [a.tolist() if hasattr(a, 'tolist') else None for a in actions]
-            with open(result_dir + f"/{idx}/" + 'actions.json', 'w') as fa:
+            with open(result_dir + f"/{episode_key}/" + 'actions.json', 'w') as fa:
                 json.dump(actions_list, fa)
         except Exception:
             pass
         try:
-            with open(result_dir + f"/{idx}/" + 'options.json', 'w') as fo:
+            with open(result_dir + f"/{episode_key}/" + 'options.json', 'w') as fo:
                 json.dump(options, fo, cls=StableJSONizer)
         except Exception:
             try:
-                with open(result_dir + f"/{idx}/" + 'options.json', 'w') as fo:
+                with open(result_dir + f"/{episode_key}/" + 'options.json', 'w') as fo:
                     json.dump(options, fo)
             except Exception:
                 pass

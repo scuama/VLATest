@@ -94,12 +94,24 @@ ENVIRONMENT_MAP = {
 }
 
 
+def _prepare_renderer_kwargs(env_kwargs: dict):
+    """Ensure renderer kwargs exist and default to offscreen mode."""
+    renderer_kwargs = env_kwargs.get("renderer_kwargs")
+    if renderer_kwargs is None:
+        renderer_kwargs = {}
+    else:
+        renderer_kwargs = renderer_kwargs.copy()
+    renderer_kwargs.setdefault("offscreen_only", True)
+    env_kwargs["renderer_kwargs"] = renderer_kwargs
+
+
 def make(task_name):
     """Creates simulated eval environment from task name."""
-    assert task_name in ENVIRONMENTS, f"Task {task_name} is not supported. Environments: \n {ENVIRONMENTS}"
-    env_name, kwargs = ENVIRONMENT_MAP[task_name]
-    # 注释掉强制设置，允许 ENVIRONMENT_MAP 中的配置生效
-    # if "prepackaged_config" not in kwargs:
-    #     kwargs["prepackaged_config"] = True
-    env = gym.make(env_name, obs_mode="rgbd", **kwargs)
+    assert (
+        task_name in ENVIRONMENTS
+    ), f"Task {task_name} is not supported. Environments: \n {ENVIRONMENTS}"
+    env_name, base_kwargs = ENVIRONMENT_MAP[task_name]
+    env_kwargs = base_kwargs.copy()
+    _prepare_renderer_kwargs(env_kwargs)
+    env = gym.make(env_name, obs_mode="rgbd", **env_kwargs)
     return env

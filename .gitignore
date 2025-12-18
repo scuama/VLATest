@@ -47,3 +47,12 @@ inference_results
 feedback
 newdata
 newresult_v2
+
+# Optimization generated files
+optimization/*/episodes/
+optimization/*/results/
+optimization/*/success/
+optimization/*/batch_*_dataset.json
+optimization/*/batch_report.json
+optimization/log/
+optimization/log/*.log
