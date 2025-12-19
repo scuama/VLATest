@@ -1,0 +1,10 @@
+{
+  "base_dir": "newresult/t-grasp_n-100_o-0_s-170912623/openvla-7b_2024/t-grasp_n-100_o-0_s-170912623/openvla-7b_2024",
+  "task": "grasp",
+  "min_grasp_steps": 5,
+  "cases": [
+    {"episode_id": "1", "strategy": "optimize_grasp", "direction": "right-up"},
+    {"episode_id": "0", "strategy": "move_closer"},
+    {"episode_id": "7", "strategy": "replace_object", "new_object": "coke_can"}
+  ]
+}
