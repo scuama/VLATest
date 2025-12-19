@@ -21,6 +21,14 @@ from datetime import datetime
 
 
 # ==================== 配置 ====================
+# 项目根目录
+PROJECT_ROOT = "/mnt/disk1/decom/VLATest"
+
+# 虚拟环境 Python（如果存在）
+VENV_PYTHON = os.path.join(PROJECT_ROOT, ".venv/bin/python3")
+if not os.path.exists(VENV_PYTHON):
+    VENV_PYTHON = "python3"  # 回退到系统 Python
+
 OPENVLA_SCRIPT = "/mnt/disk1/decom/VLATest/experiments/openVLA.py"
 
 STRATEGY_SCRIPTS = {
@@ -58,10 +66,14 @@ def get_successful_episodes(success_dir):
         return set()
     
     # 读取所有已成功的 episode ID
+    # 结构: success/<model_tag>_<seed>/<episode_id>/
     successful = set()
-    for item in success_dir.iterdir():
-        if item.is_dir():
-            successful.add(item.name)
+    for model_dir in success_dir.iterdir():
+        if model_dir.is_dir():
+            # 遍历该模型目录下的所有 episode
+            for episode_dir in model_dir.iterdir():
+                if episode_dir.is_dir():
+                    successful.add(episode_dir.name)  # 添加 episode ID（如 "2", "7", "44"）
     
     return successful
 
@@ -359,11 +371,14 @@ def collect_success(source_file_dir, success_base_dir, model_tag, episode_id, se
 def process_case(case, config, task_type, skip_successful=True):
     """处理单个案例 - 仅应用策略"""
     episode_id = case['episode_id']
-    strategy = case['strategy']
+    strategy = case.get('strategy', 'none')
+    skip_optimization = case.get('skip_optimization', False)
     
     print(f"\n{'='*70}")
     print(f"📋 处理案例: Episode {episode_id}")
     print(f"   策略: {strategy}")
+    if skip_optimization:
+        print(f"   🔄 跳过优化，使用已有配置")
     print(f"{'='*70}")
     
     # 目录结构
@@ -375,16 +390,29 @@ def process_case(case, config, task_type, skip_successful=True):
     
     # 1. 检查是否已成功
     if skip_successful:
-        if (success_dir / episode_id).exists():
-            print(f"⏭️  已成功，跳过")
-            return {"status": "skipped", "reason": "already_successful"}
+        # 检查所有模型目录下是否有该 episode
+        for model_dir in success_dir.iterdir():
+            if model_dir.is_dir() and (model_dir / episode_id).exists():
+                print(f"⏭️  已成功，跳过")
+                return {"status": "skipped", "reason": "already_successful"}
     
-    # 2. 复制原始配置到工作目录
+    # 2. 如果设置了 skip_optimization，检查已有配置是否存在
+    if skip_optimization:
+        options_file = work_episode_dir / "options.json"
+        if not options_file.exists():
+            print(f"   ❌ 设置了 skip_optimization 但配置文件不存在: {options_file}")
+            print(f"   💡 提示: 需要先运行一次优化生成配置，或手动创建配置文件")
+            return {"status": "failed", "reason": "config_not_found"}
+        
+        print(f"   ✅ 使用已有配置: {options_file}")
+        return {"status": "optimized", "episode_dir": str(work_episode_dir)}
+    
+    # 3. 复制原始配置到工作目录
     source_episode_dir = Path(config['base_dir']) / episode_id
     if not copy_episode_config(source_episode_dir, work_episode_dir):
         return {"status": "failed", "reason": "copy_config_failed"}
     
-    # 3. 应用策略
+    # 4. 应用策略
     if not apply_strategy(episode_id, strategy, case, work_episode_dir, 
                          config['base_dir'], task_type):
         return {"status": "failed", "reason": "strategy_failed"}
@@ -428,6 +456,11 @@ def run_all_inference(optimized_cases, config, task_type):
         try:
             with open(options_file, 'r') as f:
                 options = json.load(f)
+            
+            # 应用 max_episode_steps（如果在配置中指定了）
+            if 'max_episode_steps' in case_info:
+                options['max_episode_steps'] = case_info['max_episode_steps']
+                print(f"   🔧 Episode {episode_id}: 设置最大步数 = {case_info['max_episode_steps']}")
             
             # 使用原始 episode_id 作为键（保持一致性）
             batch_dataset[episode_id] = options
@@ -475,8 +508,12 @@ def run_all_inference(optimized_cases, config, task_type):
     batch_result_dir = results_dir / "batch_inference"
     batch_result_dir.mkdir(parents=True, exist_ok=True)
     
+    # 创建批量推理日志文件
+    batch_inference_log = task_dir / "log" / f"batch_inference_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    batch_inference_log.parent.mkdir(parents=True, exist_ok=True)
+    
     cmd = [
-        "python3", OPENVLA_SCRIPT,
+        VENV_PYTHON, OPENVLA_SCRIPT,
         "--data", str(batch_dataset_file),
         "--output", str(batch_result_dir) + "/",  # 确保以 / 结尾
         "--model", config.get('model', 'openvla-7b')
@@ -489,25 +526,63 @@ def run_all_inference(optimized_cases, config, task_type):
         cmd.extend(["--lora_path", config['lora_path']])
     
     try:
-        result = subprocess.run(
+        # 设置环境变量，确保能找到 simpler_env 模块
+        env = os.environ.copy()
+        env['PYTHONPATH'] = PROJECT_ROOT
+        
+        # 打开日志文件用于实时写入
+        log_file = open(batch_inference_log, 'w', buffering=1)  # 行缓冲
+        
+        # 写入头部信息
+        log_file.write(f"批量推理命令: {' '.join(cmd)}\n")
+        log_file.write(f"Python 解释器: {VENV_PYTHON}\n")
+        log_file.write(f"环境变量 PYTHONPATH: {env['PYTHONPATH']}\n")
+        log_file.write(f"开始时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        log_file.write("="*70 + "\n\n")
+        log_file.flush()
+        
+        # 使用 Popen 实现实时输出
+        process = subprocess.Popen(
             cmd,
-            cwd="/mnt/disk1/decom/VLATest",
-            capture_output=True,
-            text=True
+            cwd=PROJECT_ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,  # 合并 stderr 到 stdout
+            text=True,
+            bufsize=1,  # 行缓冲
+            env=env
         )
         
-        if result.returncode != 0:
-            print(f"❌ 批量推理失败")
-            if result.stderr:
-                print(f"错误信息:\n{result.stderr}")
-            if result.stdout:
-                print(f"标准输出:\n{result.stdout}")
+        # 实时读取并写入日志
+        for line in process.stdout:
+            log_file.write(line)
+            log_file.flush()
+        
+        # 等待进程结束
+        process.wait()
+        
+        # 写入尾部信息
+        log_file.write("\n" + "="*70 + "\n")
+        log_file.write(f"结束时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        log_file.write(f"返回码: {process.returncode}\n")
+        log_file.close()
+        
+        print(f"   📄 推理日志已保存: {batch_inference_log}")
+        
+        if process.returncode != 0:
+            print(f"❌ 批量推理失败（返回码: {process.returncode}）")
+            print(f"   详细日志: {batch_inference_log}")
             return []
         
         print(f"✅ 批量推理完成")
         
     except Exception as e:
         print(f"❌ 批量推理异常: {e}")
+        # 保存异常信息
+        try:
+            with open(batch_inference_log, 'a') as f:
+                f.write(f"\n异常信息: {str(e)}\n")
+        except:
+            pass
         return []
     
     # 4. 处理每个场景的推理结果

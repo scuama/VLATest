@@ -14,6 +14,13 @@ from pathlib import Path
 
 
 # ==================== 默认配置参数 ====================
+PROJECT_ROOT = "/mnt/disk1/decom/VLATest"
+
+# 虚拟环境 Python（如果存在）
+VENV_PYTHON = os.path.join(PROJECT_ROOT, ".venv/bin/python3")
+if not os.path.exists(VENV_PYTHON):
+    VENV_PYTHON = "python3"  # 回退到系统 Python
+
 DEFAULT_BASE_DIR = "results/t-move_n-100_o-0_s-3225323079/openvla-7b_2024"
 DEFAULT_TASK_NAME = "google_robot_move_near_customizable"
 DEFAULT_TASK_TYPE = "move"
@@ -122,19 +129,24 @@ def modify_object_position(options, object_name, x_range, y_range):
 def run_replay(episode_dir, task_name):
     """运行重放脚本"""
     cmd = [
-        "python3", REPLAY_SCRIPT,
+        VENV_PYTHON, REPLAY_SCRIPT,
         "--episode_dir", episode_dir,
         "--task", task_name,
         "--render_every", "1"
     ]
     
     try:
+        # 设置 PYTHONPATH 确保能找到 simpler_env 模块
+        env = os.environ.copy()
+        env['PYTHONPATH'] = PROJECT_ROOT
+        
         result = subprocess.run(
             cmd,
-            cwd="/mnt/disk1/decom/VLATest",
+            cwd=PROJECT_ROOT,
             capture_output=True,
             text=True,
-            timeout=60
+            timeout=60,
+            env=env
         )
         return result.returncode == 0
     except subprocess.TimeoutExpired:

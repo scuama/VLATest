@@ -3,8 +3,8 @@
   "task": "move",
   "min_grasp_steps": 5,
   "cases": [
-    {"episode_id": "7", "strategy": "optimize_grasp", "direction": "right-up"},
-    {"episode_id": "2", "strategy": "move_closer"},
+    {"episode_id": "7", "strategy": "optimize_grasp", "direction": "right-up", "max_episode_steps": 80},
+    {"episode_id": "2", "strategy": "move_closer", "skip_optimization": true},
     {"episode_id": "44", "strategy": "replace_object", "new_object": "coke_can"}
   ]
 }
