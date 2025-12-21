@@ -1,0 +1,13 @@
+批量推理命令: /mnt/disk1/decom/VLATest/.venv/bin/python3 /mnt/disk1/decom/VLATest/experiments/openVLA.py --data optimization/move/batch_move_dataset.json --output optimization/move/results/batch_inference/ --model openvla-7b
+Python 解释器: /mnt/disk1/decom/VLATest/.venv/bin/python3
+环境变量 PYTHONPATH: /mnt/disk1/decom/VLATest
+开始时间: 2025-12-19 19:46:47
+======================================================================
+
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+2025-12-19 19:46:50.238740: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2025-12-19 19:46:50.239060: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2025-12-19 19:46:50.240858: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2025-12-19 19:46:51.801768: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT

@@ -66,14 +66,11 @@ def get_successful_episodes(success_dir):
         return set()
     
     # 读取所有已成功的 episode ID
-    # 结构: success/<model_tag>_<seed>/<episode_id>/
+    # 结构: success/<episode_id>/
     successful = set()
-    for model_dir in success_dir.iterdir():
-        if model_dir.is_dir():
-            # 遍历该模型目录下的所有 episode
-            for episode_dir in model_dir.iterdir():
-                if episode_dir.is_dir():
-                    successful.add(episode_dir.name)  # 添加 episode ID（如 "2", "7", "44"）
+    for episode_dir in success_dir.iterdir():
+        if episode_dir.is_dir() and episode_dir.name.isdigit():
+            successful.add(episode_dir.name)  # 添加 episode ID（如 "2", "7", "44"）
     
     return successful
 
@@ -308,11 +305,11 @@ def run_inference(episode_dir, result_dir, episode_id, task_type, model="openvla
         return False, None
 
 
-def collect_success(source_file_dir, success_base_dir, model_tag, episode_id, seed):
+def collect_success(source_file_dir, success_base_dir, episode_id):
     """
-    收集成功案例到标准结构
+    收集成功案例到简洁结构
     
-    结构: success_base_dir/openvla-7b_<seed>/<episode_id>/
+    结构: success_base_dir/<episode_id>/
           ├── log.json
           ├── actions.npy
           ├── actions.json
@@ -324,23 +321,20 @@ def collect_success(source_file_dir, success_base_dir, model_tag, episode_id, se
     Args:
         source_file_dir: 源文件目录（包含log.json等的目录）
         success_base_dir: 成功案例基础目录 (如 optimization/move/success)
-        model_tag: 模型标签 (如 openvla-7b)
-        episode_id: Episode ID（保持原始编号，如 "2", "7", "44"）
-        seed: 随机种子
+        episode_id: Episode ID（如 "2", "7", "44"）
     """
     source_file_dir = Path(source_file_dir)
     success_base_dir = Path(success_base_dir)
     
-    # 创建标准结构目录: success/openvla-7b_<seed>/<episode_id>/
-    model_dir_name = f"{model_tag}_{seed}"
-    target_dir = success_base_dir / model_dir_name / episode_id
+    # 创建简洁结构目录: success/<episode_id>/
+    target_dir = success_base_dir / episode_id
     
     # 如果目录已存在，先删除
     if target_dir.exists():
         shutil.rmtree(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
     
-    print(f"\n   📦 收集成功案例 Episode {episode_id}...")
+    print(f"   📦 收集成功案例到: {target_dir}")
     
     # 复制结果文件 (log.json, actions.npy, actions.json, options.json)
     files_copied = 0
@@ -361,8 +355,7 @@ def collect_success(source_file_dir, success_base_dir, model_tag, episode_id, se
                 shutil.copy2(img_file, target_images_dir / img_file.name)
                 files_copied += 1
     
-    print(f"   ✅ 成功案例已收集: {target_dir}")
-    print(f"      文件数: {files_copied}")
+    print(f"   ✅ 已收集 {files_copied} 个文件")
     return True
 
 
@@ -390,11 +383,10 @@ def process_case(case, config, task_type, skip_successful=True):
     
     # 1. 检查是否已成功
     if skip_successful:
-        # 检查所有模型目录下是否有该 episode
-        for model_dir in success_dir.iterdir():
-            if model_dir.is_dir() and (model_dir / episode_id).exists():
-                print(f"⏭️  已成功，跳过")
-                return {"status": "skipped", "reason": "already_successful"}
+        # 检查 success 目录下是否有该 episode
+        if (success_dir / episode_id).exists():
+            print(f"⏭️  已成功，跳过")
+            return {"status": "skipped", "reason": "already_successful"}
     
     # 2. 如果设置了 skip_optimization，检查已有配置是否存在
     if skip_optimization:
@@ -421,255 +413,267 @@ def process_case(case, config, task_type, skip_successful=True):
     return {"status": "optimized", "episode_dir": str(work_episode_dir)}
 
 
+def run_single_inference(episode_id, work_episode_dir, results_dir, success_dir, config):
+    """
+    运行单个案例的推理，并实时保存结果
+    
+    Args:
+        episode_id: Episode ID
+        work_episode_dir: 工作目录（包含优化后的 options.json）
+        results_dir: 结果保存目录
+        success_dir: 成功案例目录
+        config: 配置信息
+    
+    Returns:
+        dict: 推理结果 {'status': 'success'/'failed', 'episode_id': ..., ...}
+    """
+    work_episode_dir = Path(work_episode_dir)
+    results_dir = Path(results_dir)
+    success_dir = Path(success_dir)
+    
+    # 结果保存到 results/<episode_id>/
+    result_episode_dir = results_dir / episode_id
+    
+    # 检查是否已有结果（支持中断恢复）
+    if result_episode_dir.exists() and (result_episode_dir / "log.json").exists():
+        print(f"   ℹ️  已有推理结果，检查是否成功...")
+        if check_success_from_log(result_episode_dir / "log.json"):
+            print(f"   ✅ 已成功，跳过推理")
+            # 确保成功案例已收集
+            if not (success_dir / episode_id).exists():
+                collect_success(result_episode_dir, success_dir, episode_id)
+            return {
+                'episode_id': episode_id,
+                'status': 'success',
+                'result_dir': str(result_episode_dir)
+            }
+        else:
+            print(f"   ⚠️  之前推理失败，重新运行...")
+            shutil.rmtree(result_episode_dir)
+    
+    result_episode_dir.mkdir(parents=True, exist_ok=True)
+    
+    print(f"\n   🚀 运行推理...")
+    
+    # 1. 读取优化后的 options.json
+    options_file = work_episode_dir / "options.json"
+    if not options_file.exists():
+        print(f"   ❌ 找不到 options.json: {options_file}")
+        return {'episode_id': episode_id, 'status': 'failed', 'reason': 'config_not_found'}
+    
+    try:
+        with open(options_file, 'r') as f:
+            options = json.load(f)
+    except Exception as e:
+        print(f"   ❌ 读取 options.json 失败: {e}")
+        return {'episode_id': episode_id, 'status': 'failed', 'reason': 'config_read_error'}
+    
+    # 2. 创建单个案例的数据集
+    dataset = {
+        episode_id: options,
+        "seed": options.get("seed", 0),
+        "num": 1
+    }
+    
+    # 创建临时数据集文件
+    task_type = config.get('task', 'unknown')
+    temp_dataset_file = work_episode_dir / f"temp_{task_type}_{episode_id}.json"
+    try:
+        with open(temp_dataset_file, 'w') as f:
+            json.dump(dataset, f, indent=2)
+        print(f"   📄 创建临时数据集: {temp_dataset_file.name}")
+    except Exception as e:
+        print(f"   ❌ 创建临时数据集失败: {e}")
+        return {'episode_id': episode_id, 'status': 'failed', 'reason': 'dataset_create_error'}
+    
+    # 3. 运行推理
+    model = config.get('model', 'openvla-7b')
+    cmd = [
+        VENV_PYTHON, OPENVLA_SCRIPT,
+        "--data", str(temp_dataset_file),
+        "--output", str(result_episode_dir.parent) + "/",  # 输出到 results/
+        "--model", model
+    ]
+    
+    if config.get('lora_path'):
+        cmd.extend(["--lora_path", config['lora_path']])
+    
+    try:
+        # 设置环境变量
+        env = os.environ.copy()
+        env['PYTHONPATH'] = PROJECT_ROOT
+        env['PYOPENGL_PLATFORM'] = 'egl'
+        env['MUJOCO_GL'] = 'egl'
+        env.pop('DISPLAY', None)
+        env.pop('WAYLAND_DISPLAY', None)
+        
+        result = subprocess.run(
+            cmd,
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=600  # 10分钟超时
+        )
+        
+        # 清理临时文件
+        if temp_dataset_file.exists():
+            temp_dataset_file.unlink()
+        
+        if result.returncode != 0:
+            print(f"   ❌ 推理失败")
+            if result.stderr:
+                print(f"   错误: {result.stderr[:500]}")
+            return {'episode_id': episode_id, 'status': 'failed', 'reason': 'inference_error'}
+        
+        # 4. 查找生成的 log.json
+        # openVLA.py 会创建类似 results/temp_{task}_{episode_id}/model_seed/episode_id/log.json
+        log_file = None
+        
+        # 先在直接路径查找
+        direct_log = result_episode_dir / "log.json"
+        if direct_log.exists():
+            log_file = direct_log
+        else:
+            # 在临时目录中查找
+            for subdir in result_episode_dir.parent.rglob(f"*/{episode_id}/log.json"):
+                log_file = subdir
+                # 将结果移动到正确位置
+                source_dir = log_file.parent
+                for item in source_dir.iterdir():
+                    if item.is_file():
+                        shutil.copy2(item, result_episode_dir / item.name)
+                    elif item.is_dir() and item.name == "images":
+                        target_images = result_episode_dir / "images"
+                        if target_images.exists():
+                            shutil.rmtree(target_images)
+                        shutil.copytree(item, target_images)
+                log_file = result_episode_dir / "log.json"
+                break
+        
+        if not log_file or not log_file.exists():
+            print(f"   ⚠️  推理完成但未找到 log.json")
+            return {'episode_id': episode_id, 'status': 'failed', 'reason': 'log_not_found'}
+        
+        # 5. 检查是否成功
+        is_successful = check_success_from_log(log_file)
+        
+        if is_successful:
+            print(f"   ✅ 推理成功！")
+            # 收集到成功目录
+            collect_success(result_episode_dir, success_dir, episode_id)
+            return {
+                'episode_id': episode_id,
+                'status': 'success',
+                'result_dir': str(result_episode_dir)
+            }
+        else:
+            print(f"   ❌ 推理失败（任务未成功）")
+            return {'episode_id': episode_id, 'status': 'failed', 'reason': 'task_not_successful'}
+        
+    except subprocess.TimeoutExpired:
+        if temp_dataset_file.exists():
+            temp_dataset_file.unlink()
+        print(f"   ⏱️  推理超时")
+        return {'episode_id': episode_id, 'status': 'failed', 'reason': 'timeout'}
+    except Exception as e:
+        if temp_dataset_file.exists():
+            temp_dataset_file.unlink()
+        print(f"   ❌ 推理异常: {e}")
+        return {'episode_id': episode_id, 'status': 'failed', 'reason': str(e)}
+
+
 def run_all_inference(optimized_cases, config, task_type):
-    """统一运行所有优化案例的推理 - 整合成一个大数据集"""
+    """逐个运行所有优化案例的推理，支持中断恢复"""
     print(f"\n\n{'#'*70}")
-    print(f"# 开始统一推理阶段")
+    print(f"# 开始推理阶段（逐个执行，支持中断恢复）")
     print(f"{'#'*70}\n")
     
     task_dir = Path(f"optimization/{task_type}")
     results_dir = task_dir / "results"
     success_dir = task_dir / "success"
     
-    # 获取 model 和 seed 信息（稍后用于收集成功案例）
-    model_tag = config.get('model', 'openvla-7b')
-    
-    # 1. 整合所有场景到一个数据集
-    print(f"📦 整合数据集...")
-    
-    batch_dataset = {
-        "num": len(optimized_cases)
-    }
-    
-    episode_list = []  # 记录处理顺序，用于后续映射
-    
-    for case_info in optimized_cases:
-        episode_id = case_info['episode_id']
-        work_episode_dir = Path(case_info['episode_dir'])
-        
-        # 读取优化后的 options.json
-        options_file = work_episode_dir / "options.json"
-        if not options_file.exists():
-            print(f"   ⚠️  Episode {episode_id}: 找不到 options.json")
-            continue
-        
-        try:
-            with open(options_file, 'r') as f:
-                options = json.load(f)
-            
-            # 应用 max_episode_steps（如果在配置中指定了）
-            if 'max_episode_steps' in case_info:
-                options['max_episode_steps'] = case_info['max_episode_steps']
-                print(f"   🔧 Episode {episode_id}: 设置最大步数 = {case_info['max_episode_steps']}")
-            
-            # 使用原始 episode_id 作为键（保持一致性）
-            batch_dataset[episode_id] = options
-            
-            # 如果有 seed，使用第一个场景的 seed
-            if "seed" not in batch_dataset and "seed" in options:
-                batch_dataset["seed"] = options["seed"]
-            
-            episode_list.append(episode_id)
-            
-            # 显示源物体信息（仅用于日志）
-            model_ids = options.get("model_ids", [])
-            source_obj_id = options.get("source_obj_id", 0)
-            if isinstance(model_ids, list) and 0 <= source_obj_id < len(model_ids):
-                source_model = model_ids[source_obj_id]
-            else:
-                source_model = "unknown"
-            print(f"   ✅ Episode {episode_id}: {source_model}")
-            
-        except Exception as e:
-            print(f"   ❌ Episode {episode_id}: 解析失败 - {e}")
-            continue
-    
-    # 更新实际数量
-    batch_dataset["num"] = len(episode_list)
-    
-    # 设置默认 seed
-    if "seed" not in batch_dataset:
-        batch_dataset["seed"] = 0
-    
-    # 2. 保存批量数据集（文件名必须包含任务类型关键词以便 openVLA.py 推断任务）
-    batch_dataset_file = task_dir / f"batch_{task_type}_dataset.json"
-    try:
-        with open(batch_dataset_file, 'w') as f:
-            json.dump(batch_dataset, f, indent=2)
-        print(f"\n📄 批量数据集已保存: {batch_dataset_file}")
-        print(f"   包含 {len(episode_list)} 个场景: {', '.join(episode_list)}")
-    except Exception as e:
-        print(f"❌ 保存批量数据集失败: {e}")
-        return []
-    
-    # 3. 运行批量推理
-    print(f"\n🚀 开始批量推理...")
-    
-    batch_result_dir = results_dir / "batch_inference"
-    batch_result_dir.mkdir(parents=True, exist_ok=True)
-    
-    # 创建批量推理日志文件
-    batch_inference_log = task_dir / "log" / f"batch_inference_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-    batch_inference_log.parent.mkdir(parents=True, exist_ok=True)
-    
-    cmd = [
-        VENV_PYTHON, OPENVLA_SCRIPT,
-        "--data", str(batch_dataset_file),
-        "--output", str(batch_result_dir) + "/",  # 确保以 / 结尾
-        "--model", config.get('model', 'openvla-7b')
-    ]
-    
-    # 不使用 resume 模式，确保重新运行
-    # (默认 action='store_true' 不传参数就是 False)
-    
-    if config.get('lora_path'):
-        cmd.extend(["--lora_path", config['lora_path']])
-    
-    try:
-        # 设置环境变量，确保能找到 simpler_env 模块
-        env = os.environ.copy()
-        env['PYTHONPATH'] = PROJECT_ROOT
-        
-        # 打开日志文件用于实时写入
-        log_file = open(batch_inference_log, 'w', buffering=1)  # 行缓冲
-        
-        # 写入头部信息
-        log_file.write(f"批量推理命令: {' '.join(cmd)}\n")
-        log_file.write(f"Python 解释器: {VENV_PYTHON}\n")
-        log_file.write(f"环境变量 PYTHONPATH: {env['PYTHONPATH']}\n")
-        log_file.write(f"开始时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        log_file.write("="*70 + "\n\n")
-        log_file.flush()
-        
-        # 使用 Popen 实现实时输出
-        process = subprocess.Popen(
-            cmd,
-            cwd=PROJECT_ROOT,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,  # 合并 stderr 到 stdout
-            text=True,
-            bufsize=1,  # 行缓冲
-            env=env
-        )
-        
-        # 实时读取并写入日志
-        for line in process.stdout:
-            log_file.write(line)
-            log_file.flush()
-        
-        # 等待进程结束
-        process.wait()
-        
-        # 写入尾部信息
-        log_file.write("\n" + "="*70 + "\n")
-        log_file.write(f"结束时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        log_file.write(f"返回码: {process.returncode}\n")
-        log_file.close()
-        
-        print(f"   📄 推理日志已保存: {batch_inference_log}")
-        
-        if process.returncode != 0:
-            print(f"❌ 批量推理失败（返回码: {process.returncode}）")
-            print(f"   详细日志: {batch_inference_log}")
-            return []
-        
-        print(f"✅ 批量推理完成")
-        
-    except Exception as e:
-        print(f"❌ 批量推理异常: {e}")
-        # 保存异常信息
-        try:
-            with open(batch_inference_log, 'a') as f:
-                f.write(f"\n异常信息: {str(e)}\n")
-        except:
-            pass
-        return []
-    
-    # 4. 处理每个场景的推理结果
-    print(f"\n📊 处理推理结果...")
+    results_dir.mkdir(parents=True, exist_ok=True)
+    success_dir.mkdir(parents=True, exist_ok=True)
     
     inference_results = []
     
-    for episode_id in episode_list:
+    for idx, case_info in enumerate(optimized_cases, 1):
+        episode_id = case_info['episode_id']
+        work_episode_dir = Path(case_info['episode_dir'])
+        
         print(f"\n{'='*70}")
-        print(f"📋 Episode {episode_id}")
+        print(f"📋 推理案例 [{idx}/{len(optimized_cases)}]: Episode {episode_id}")
         print(f"{'='*70}")
         
-        # 查找对应的 log.json
-        # openVLA.py 生成的结构: batch_result_dir/batch_{task_type}_dataset/openvla-7b_<seed>/{episode_id}/log.json
-        log_file = None
+        result = run_single_inference(
+            episode_id=episode_id,
+            work_episode_dir=work_episode_dir,
+            results_dir=results_dir,
+            success_dir=success_dir,
+            config=config
+        )
         
-        # 直接查找包含该 episode_id 的路径
-        for subdir in batch_result_dir.rglob(f"*/{episode_id}/log.json"):
-            log_file = subdir
-            break
+        inference_results.append(result)
         
-        # 如果失败，尝试更宽松的查找
-        if not log_file:
-            for subdir in batch_result_dir.rglob("log.json"):
-                # 检查路径中是否包含正确的 episode_id
-                if f"/{episode_id}/" in str(subdir):
-                    log_file = subdir
-                    break
-        
-        if not log_file or not log_file.exists():
-            print(f"   ⚠️  未找到 log.json")
-            inference_results.append({
-                'episode_id': episode_id,
-                'status': 'failed',
-                'reason': 'log_not_found'
-            })
-            continue
-        
-        print(f"   📄 日志文件: {log_file}")
-        
-        # 检查是否成功
-        is_successful = check_success_from_log(log_file)
-        
-        if is_successful:
-            print(f"   ✅ 推理成功！")
-            
-            # 复制结果到对应 episode 目录
-            result_episode_dir = results_dir / episode_id
-            result_episode_dir.mkdir(parents=True, exist_ok=True)
-            
-            # 复制所有结果文件
-            import shutil
-            source_result_dir = log_file.parent
-            
-            # 复制 log.json, actions.npy, actions.json, options.json
-            for filename in ["log.json", "actions.npy", "actions.json", "options.json"]:
-                src_file = source_result_dir / filename
-                if src_file.exists():
-                    shutil.copy2(src_file, result_episode_dir / filename)
-            
-            # 复制 images 目录（如果存在）
-            images_dir = source_result_dir / "images"
-            if images_dir.exists():
-                target_images_dir = result_episode_dir / "images"
-                if target_images_dir.exists():
-                    shutil.rmtree(target_images_dir)
-                shutil.copytree(images_dir, target_images_dir)
-            
-            # 收集成功案例到标准结构
-            seed = batch_dataset.get("seed", 0)
-            collect_success(result_episode_dir, success_dir, model_tag, episode_id, seed)
-            
-            inference_results.append({
-                'episode_id': episode_id,
-                'status': 'success',
-                'result_dir': str(result_episode_dir)
-            })
-        else:
-            print(f"   ❌ 推理失败")
-            inference_results.append({
-                'episode_id': episode_id,
-                'status': 'failed',
-                'reason': 'inference_not_successful'
-            })
+        # 实时显示进度
+        success_count = sum(1 for r in inference_results if r['status'] == 'success')
+        print(f"\n   📊 当前进度: {idx}/{len(optimized_cases)}, 成功: {success_count}")
+    
+    # 清理临时目录
+    for temp_dir in results_dir.glob("temp_*"):
+        if temp_dir.is_dir():
+            try:
+                shutil.rmtree(temp_dir)
+                print(f"   🗑️  清理临时目录: {temp_dir.name}")
+            except:
+                pass
     
     return inference_results
 
+
+def diagnose_inference_stuck(task_type):
+    """诊断推理是否卡住"""
+    task_dir = Path(f"optimization/{task_type}")
+    batch_dataset_file = task_dir / f"batch_{task_type}_dataset.json"
+    
+    print(f"\n🔍 诊断推理状态:")
+    
+    # 检查数据集文件
+    if not batch_dataset_file.exists():
+        print(f"   ❌ 数据集文件不存在: {batch_dataset_file}")
+        return False
+    
+    # 检查日志文件
+    log_dir = task_dir / "log"
+    if log_dir.exists():
+        log_files = list(log_dir.glob("batch_inference_*.log"))
+        if log_files:
+            latest_log = max(log_files, key=lambda x: x.stat().st_mtime)
+            print(f"   📄 最新日志: {latest_log}")
+            
+            # 读取最后几行
+            try:
+                with open(latest_log, 'r') as f:
+                    lines = f.readlines()
+                    print(f"   日志行数: {len(lines)}")
+                    
+                    if lines:
+                        print(f"\n   最后10行内容:")
+                        for line in lines[-10:]:
+                            print(f"      {line.strip()}")
+            except Exception as e:
+                print(f"   读取日志失败: {e}")
+    
+    # 检查结果目录
+    results_dir = task_dir / "results" / "batch_inference"
+    if results_dir.exists():
+        subdirs = list(results_dir.iterdir())
+        print(f"\n   结果目录内容 ({len(subdirs)} 项):")
+        for subdir in subdirs:
+            print(f"      {subdir.name}")
+    
+    return True
 
 def main():
     parser = argparse.ArgumentParser(description="优化流程统一入口")
@@ -679,8 +683,16 @@ def main():
                        help="不跳过已成功的案例")
     parser.add_argument("--episode", type=str,
                        help="只处理指定的 episode ID")
+    parser.add_argument("--skip-optimization", action="store_true",
+                       help="跳过优化阶段，直接运行推理")
+    parser.add_argument("--diagnose", action="store_true",
+                       help="诊断推理状态")
     
     args = parser.parse_args()
+    
+    if args.diagnose:
+        diagnose_inference_stuck(args.task)
+        return 0
     
     print(f"\n{'#'*70}")
     print(f"# 优化流程 - {args.task.upper()} 任务")
@@ -713,11 +725,7 @@ def main():
             print(f"\n❌ 未找到 episode {args.episode}")
             return 1
     
-    # 4. 阶段1：应用所有策略
-    print(f"\n\n{'#'*70}")
-    print(f"# 阶段1：应用优化策略")
-    print(f"{'#'*70}\n")
-    
+    # 4. 阶段1：应用所有策略（或跳过）
     optimized_cases = []
     optimization_results = {
         'total': len(cases_to_process),
@@ -727,31 +735,83 @@ def main():
         'details': []
     }
     
-    for idx, case in enumerate(cases_to_process, 1):
+    if args.skip_optimization:
+        # 跳过优化，直接使用已有配置
         print(f"\n\n{'#'*70}")
-        print(f"# 优化案例 [{idx}/{len(cases_to_process)}]")
-        print(f"{'#'*70}")
+        print(f"# 跳过优化阶段，使用已有配置")
+        print(f"{'#'*70}\n")
         
-        result = process_case(case, config, args.task, skip_successful=not args.no_skip)
+        episodes_dir = Path(f"optimization/{args.task}/episodes")
         
-        result['episode_id'] = case['episode_id']
-        optimization_results['details'].append(result)
-        
-        if result['status'] == 'optimized':
+        for idx, case in enumerate(cases_to_process, 1):
+            episode_id = case['episode_id']
+            work_episode_dir = episodes_dir / episode_id
+            options_file = work_episode_dir / "options.json"
+            
+            print(f"\n[{idx}/{len(cases_to_process)}] Episode {episode_id}")
+            
+            # 检查是否已成功（如果不是 no_skip 模式）
+            if not args.no_skip and (success_dir / episode_id).exists():
+                print(f"   ⏭️  已成功，跳过")
+                optimization_results['skipped'] += 1
+                optimization_results['details'].append({
+                    'episode_id': episode_id,
+                    'status': 'skipped',
+                    'reason': 'already_successful'
+                })
+                continue
+            
+            if not options_file.exists():
+                print(f"   ❌ 配置文件不存在: {options_file}")
+                print(f"   💡 提示: 需要先运行一次优化生成配置")
+                optimization_results['failed'] += 1
+                optimization_results['details'].append({
+                    'episode_id': episode_id,
+                    'status': 'failed',
+                    'reason': 'config_not_found'
+                })
+                continue
+            
+            print(f"   ✅ 使用已有配置")
             optimization_results['optimized'] += 1
+            result = {
+                'episode_id': episode_id,
+                'status': 'optimized',
+                'episode_dir': str(work_episode_dir)
+            }
+            optimization_results['details'].append(result)
             optimized_cases.append(result)
-        elif result['status'] == 'skipped':
-            optimization_results['skipped'] += 1
-        else:
-            optimization_results['failed'] += 1
+    else:
+        # 正常优化流程
+        print(f"\n\n{'#'*70}")
+        print(f"# 阶段1：应用优化策略")
+        print(f"{'#'*70}\n")
+        
+        for idx, case in enumerate(cases_to_process, 1):
+            print(f"\n\n{'#'*70}")
+            print(f"# 优化案例 [{idx}/{len(cases_to_process)}]")
+            print(f"{'#'*70}")
+            
+            result = process_case(case, config, args.task, skip_successful=not args.no_skip)
+            
+            result['episode_id'] = case['episode_id']
+            optimization_results['details'].append(result)
+            
+            if result['status'] == 'optimized':
+                optimization_results['optimized'] += 1
+                optimized_cases.append(result)
+            elif result['status'] == 'skipped':
+                optimization_results['skipped'] += 1
+            else:
+                optimization_results['failed'] += 1
     
     # 打印优化阶段总结
     print(f"\n\n{'='*70}")
-    print(f"📊 优化阶段完成")
+    print(f"📊 {'配置检查' if args.skip_optimization else '优化阶段'}完成")
     print(f"{'='*70}")
     print(f"总案例数: {optimization_results['total']}")
-    print(f"✅ 已优化: {optimization_results['optimized']}")
-    print(f"❌ 优化失败: {optimization_results['failed']}")
+    print(f"✅ {'可推理' if args.skip_optimization else '已优化'}: {optimization_results['optimized']}")
+    print(f"❌ 失败: {optimization_results['failed']}")
     print(f"⏭️  已跳过: {optimization_results['skipped']}")
     print(f"{'='*70}")
     

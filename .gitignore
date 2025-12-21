@@ -55,4 +55,12 @@ optimization/*/success/
 optimization/*/batch_*_dataset.json
 optimization/*/batch_report.json
 optimization/log/
-optimization/log/*.log
+optimization/*/log/
+*.log
+
+# All log directories
+**/log/
+**/logs/
+
+# Move optimization logs
+move_optimization/**/*.log
