@@ -3,8 +3,179 @@
   "task": "move",
   "min_grasp_steps": 5,
   "cases": [
-    {"episode_id": "7", "strategy": "optimize_grasp", "direction": "right-up", "max_episode_steps": 80},
-    {"episode_id": "2", "strategy": "move_closer", "skip_optimization": true},
-    {"episode_id": "44", "strategy": "replace_object", "new_object": "coke_can"}
+    {
+      "episode_id": "1",
+      "strategy": "optimize_grasp",
+      "direction": "right",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "2",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "3",
+      "strategy": "optimize_grasp",
+      "direction": "right",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "5",
+      "strategy": "replace_object",
+      "new_object": "opened_coke_can"
+    },
+    {
+      "episode_id": "7",
+      "strategy": "optimize_grasp",
+      "direction": "right-up",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "8",
+      "strategy": "replace_object",
+      "new_object": "opened_coke_can"
+    },
+    {
+      "episode_id": "11",
+      "strategy": "optimize_grasp",
+      "direction": "left",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "13",
+      "strategy": "optimize_grasp",
+      "direction": "right-up",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "14",
+      "strategy": "optimize_grasp",
+      "direction": "right-down",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "15",
+      "strategy": "replace_object",
+      "new_object": "opened_coke_can"
+    },
+    {
+      "episode_id": "23",
+      "strategy": "replace_object",
+      "new_object": "apple"
+    },
+    {
+      "episode_id": "27",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "33",
+      "strategy": "replace_object",
+      "new_object": "apple"
+    },
+    {
+      "episode_id": "36",
+      "strategy": "replace_object",
+      "new_object": "opened_coke_can"
+    },
+    {
+      "episode_id": "37",
+      "strategy": "optimize_grasp",
+      "direction": "up",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "40",
+      "strategy": "replace_object",
+      "new_object": "apple"
+    },
+    {
+      "episode_id": "44",
+      "strategy": "replace_object",
+      "new_object": "coke_can"
+    },
+    {
+      "episode_id": "46",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "49",
+      "strategy": "optimize_grasp",
+      "direction": "right-down",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "52",
+      "strategy": "replace_object",
+      "new_object": "opened_coke_can"
+    },
+    {
+      "episode_id": "57",
+      "strategy": "optimize_grasp",
+      "direction": "right",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "60",
+      "strategy": "optimize_grasp",
+      "direction": "right",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "62",
+      "strategy": "optimize_grasp",
+      "direction": "right",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "67",
+      "strategy": "optimize_grasp",
+      "direction": "right-up",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "70",
+      "strategy": "replace_object",
+      "new_object": "opened_coke_can"
+    },
+    {
+      "episode_id": "76",
+      "strategy": "replace_object",
+      "new_object": "apple"
+    },
+    {
+      "episode_id": "77",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "82",
+      "strategy": "optimize_grasp",
+      "direction": "right",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "84",
+      "strategy": "optimize_grasp",
+      "direction": "right-up",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "92",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "97",
+      "strategy": "replace_object",
+      "new_object": "opened_coke_can"
+    },
+    {
+      "episode_id": "99",
+      "strategy": "replace_object",
+      "new_object": "opened_coke_can"
+    }
   ]
 }

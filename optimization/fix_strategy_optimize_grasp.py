@@ -21,9 +21,9 @@ VENV_PYTHON = os.path.join(PROJECT_ROOT, ".venv/bin/python3")
 if not os.path.exists(VENV_PYTHON):
     VENV_PYTHON = "python3"  # 回退到系统 Python
 
-DEFAULT_BASE_DIR = "results/t-move_n-100_o-0_s-3225323079/openvla-7b_2024"
-DEFAULT_TASK_NAME = "google_robot_move_near_customizable"
-DEFAULT_TASK_TYPE = "move"
+DEFAULT_BASE_DIR = "newresult/t-grasp_n-100_o-0_s-170912623/openvla-7b_2024/t-grasp_n-100_o-0_s-170912623/openvla-7b_2024"
+DEFAULT_TASK_NAME = "google_robot_pick_customizable"
+DEFAULT_TASK_TYPE = "grasp"
 REPLAY_SCRIPT = "/mnt/disk1/decom/VLATest/experiments/replay_openvla_actions.py"
 
 # 成功判断标准
@@ -114,16 +114,20 @@ def modify_object_position(options, object_name, x_range, y_range):
     Returns:
         (new_xy, original_xy): 新位置和原始位置
     """
-    if object_name not in options["obj_init_options"]:
-        return None, None
-    
-    obj_opts = options["obj_init_options"][object_name]
-    original_xy = obj_opts["init_xy"].copy()
-    
-    new_xy = adjust_position(original_xy, x_range, y_range)
-    obj_opts["init_xy"] = new_xy
-    
-    return new_xy, original_xy
+    obj_init_options = options.get("obj_init_options", {})
+    if object_name in obj_init_options:
+        obj_opts = obj_init_options[object_name]
+        original_xy = obj_opts["init_xy"].copy()
+        new_xy = adjust_position(original_xy, x_range, y_range)
+        obj_opts["init_xy"] = new_xy
+        return new_xy, original_xy
+    # grasp 场景：obj_init_options 直接是 init_xy/orientation
+    if "init_xy" in obj_init_options:
+        original_xy = obj_init_options["init_xy"].copy()
+        new_xy = adjust_position(original_xy, x_range, y_range)
+        obj_init_options["init_xy"] = new_xy
+        return new_xy, original_xy
+    return None, None
 
 
 def run_replay(episode_dir, task_name):
@@ -407,8 +411,12 @@ def main():
         original_options = load_options(episode_dir)
         print(f"⚠️  备份不存在，使用当前配置")
     
-    source_obj = original_options["model_ids"][original_options["source_obj_id"]]
-    original_xy = original_options['obj_init_options'][source_obj]['init_xy']
+    if "model_ids" in original_options and "source_obj_id" in original_options:
+        source_obj = original_options["model_ids"][original_options["source_obj_id"]]
+        original_xy = original_options['obj_init_options'][source_obj]['init_xy']
+    else:
+        source_obj = original_options.get("model_id", "unknown")
+        original_xy = original_options['obj_init_options']['init_xy']
     
     print(f"\n🎯 源物体: {source_obj}")
     print(f"📍 原始位置: [{original_xy[0]:.4f}, {original_xy[1]:.4f}]")
@@ -460,7 +468,11 @@ def main():
         for attempt in range(1, fine_attempts + 1):
             # 修改物体位置（在最佳点附近微调）
             options = json.loads(json.dumps(original_options))
-            obj_opts = options["obj_init_options"][source_obj]
+            obj_init_options = options["obj_init_options"]
+            if source_obj in obj_init_options:
+                obj_opts = obj_init_options[source_obj]
+            else:
+                obj_opts = obj_init_options
             
             x_offset = random.uniform(FINE_SEARCH_RANGE['x'][0], FINE_SEARCH_RANGE['x'][1])
             y_offset = random.uniform(FINE_SEARCH_RANGE['y'][0], FINE_SEARCH_RANGE['y'][1])

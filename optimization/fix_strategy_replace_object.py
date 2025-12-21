@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 # ==================== 默认配置参数 ====================
-DEFAULT_BASE_DIR = "results/t-move_n-100_o-0_s-3225323079/openvla-7b_2024"
+DEFAULT_BASE_DIR = "newresult/t-grasp_n-100_o-0_s-170912623/openvla-7b_2024/t-grasp_n-100_o-0_s-170912623/openvla-7b_2024"
 
 # 物品类别映射
 OBJECT_CATEGORIES = {
@@ -64,7 +64,14 @@ def get_available_objects_in_scene(options):
     
     # 从 obj_init_options 中获取
     if 'obj_init_options' in options:
-        available_objects.update(options['obj_init_options'].keys())
+        obj_init_options = options['obj_init_options']
+        # grasp 场景：obj_init_options 直接是 init_xy/orientation
+        if "init_xy" in obj_init_options:
+            model_id = options.get("model_id")
+            if model_id:
+                available_objects.add(model_id)
+        else:
+            available_objects.update(obj_init_options.keys())
     
     # 从 model_ids 中获取（model_ids 是列表）
     if 'model_ids' in options:
@@ -117,7 +124,15 @@ def replace_object(options, old_object_name, new_object_name):
     Returns:
         是否替换成功
     """
-    if old_object_name not in options["obj_init_options"]:
+    obj_init_options = options.get("obj_init_options", {})
+    if "init_xy" in obj_init_options:
+        # grasp 场景：仅替换 model_id，保持位置配置不变
+        if options.get("model_id") != old_object_name:
+            print(f"❌ 原物品 '{old_object_name}' 不在配置中")
+            return False
+        options["model_id"] = new_object_name
+        return True
+    if old_object_name not in obj_init_options:
         print(f"❌ 原物品 '{old_object_name}' 不在配置中")
         return False
     
@@ -176,12 +191,15 @@ def main():
         options = load_options(episode_dir)
         print(f"⚠️  备份不存在，使用当前配置")
     
-    # 获取源物体（model_ids 是列表）
-    source_obj_id = options["source_obj_id"]
-    if isinstance(options["model_ids"], list):
-        source_obj = options["model_ids"][source_obj_id]
+    # 获取源物体（兼容 grasp/move 两种配置结构）
+    if "model_ids" in options and "source_obj_id" in options:
+        source_obj_id = options["source_obj_id"]
+        if isinstance(options["model_ids"], list):
+            source_obj = options["model_ids"][source_obj_id]
+        else:
+            source_obj = options["model_ids"][source_obj_id]
     else:
-        source_obj = options["model_ids"][source_obj_id]
+        source_obj = options.get("model_id", "unknown")
     
     print(f"\n🎯 当前源物体: {source_obj}")
     

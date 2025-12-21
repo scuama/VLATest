@@ -3,8 +3,221 @@
   "task": "grasp",
   "min_grasp_steps": 5,
   "cases": [
-    {"episode_id": "1", "strategy": "optimize_grasp", "direction": "right-up"},
-    {"episode_id": "0", "strategy": "move_closer"},
-    {"episode_id": "7", "strategy": "replace_object", "new_object": "coke_can"}
+    {
+      "episode_id": "0",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "1",
+      "strategy": "optimize_grasp",
+      "direction": "right",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "2",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "3",
+      "strategy": "optimize_grasp",
+      "direction": "right",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "5",
+      "strategy": "optimize_grasp",
+      "direction": "right",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "6",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "7",
+      "strategy": "replace_object",
+      "new_object": "opened_coke_can"
+    },
+    {
+      "episode_id": "8",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "9",
+      "strategy": "replace_object",
+      "new_object": "apple"
+    },
+    {
+      "episode_id": "10",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "12",
+      "strategy": "optimize_grasp",
+      "direction": "right-down",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "13",
+      "strategy": "replace_object",
+      "new_object": "coke_can"
+    },
+    {
+      "episode_id": "14",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "17",
+      "strategy": "optimize_grasp",
+      "direction": "right-down",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "20",
+      "strategy": "replace_object",
+      "new_object": "coke_can"
+    },
+    {
+      "episode_id": "22",
+      "strategy": "optimize_grasp",
+      "direction": "right-down",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "24",
+      "strategy": "replace_object",
+      "new_object": "coke_can"
+    },
+    {
+      "episode_id": "27",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "29",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "31",
+      "strategy": "replace_object",
+      "new_object": "opened_coke_can"
+    },
+    {
+      "episode_id": "32",
+      "strategy": "optimize_grasp",
+      "direction": "left",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "33",
+      "strategy": "replace_object",
+      "new_object": "coke_can"
+    },
+    {
+      "episode_id": "34",
+      "strategy": "optimize_grasp",
+      "direction": "left",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "35",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "36",
+      "strategy": "replace_object",
+      "new_object": "redbull_can"
+    },
+    {
+      "episode_id": "38",
+      "strategy": "optimize_grasp",
+      "direction": "right-down",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "39",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "40",
+      "strategy": "optimize_grasp",
+      "direction": "right",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "42",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "46",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "47",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "48",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "51",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "52",
+      "strategy": "optimize_grasp",
+      "direction": "left",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "54",
+      "strategy": "move_closer",
+      "move_ratio": 0.3
+    },
+    {
+      "episode_id": "55",
+      "strategy": "optimize_grasp",
+      "direction": "right-down",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "56",
+      "strategy": "optimize_grasp",
+      "direction": "right",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "57",
+      "strategy": "optimize_grasp",
+      "direction": "left",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "58",
+      "strategy": "optimize_grasp",
+      "direction": "right",
+      "max_episode_steps": 80
+    },
+    {
+      "episode_id": "60",
+      "strategy": "optimize_grasp",
+      "direction": "down",
+      "max_episode_steps": 80
+    }
   ]
 }
