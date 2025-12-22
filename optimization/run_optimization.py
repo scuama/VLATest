@@ -143,7 +143,7 @@ def apply_strategy(episode_id, strategy, case_params, work_dir, base_dir, task_t
     # 策略特定参数
     if strategy == "optimize_grasp":
         direction = case_params.get('direction', 'right-up')
-        attempts = case_params.get('attempts', 10)
+        attempts = case_params.get('attempts', 20)
         cmd.extend([direction, "--attempts", str(attempts)])
     elif strategy == "move_closer":
         if 'move_ratio' in case_params:
@@ -512,8 +512,7 @@ def run_single_inference(episode_id, work_episode_dir, results_dir, success_dir,
             cwd=PROJECT_ROOT,
             capture_output=True,
             text=True,
-            env=env,
-            timeout=600  # 10分钟超时
+            env=env
         )
         
         # 清理临时文件

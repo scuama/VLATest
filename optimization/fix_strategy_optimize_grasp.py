@@ -213,7 +213,10 @@ def check_grasp_success(episode_dir, task_type, min_steps=MIN_CONSECUTIVE_GRASP_
                                   if isinstance(v, dict)], key=lambda x: x[0])
             
             for step_num, step_info in sorted_steps:
+                # 兼容两种字段名：is_src_obj_grasped 或 is_grasped
                 is_grasped = step_info.get("is_src_obj_grasped")
+                if is_grasped is None:
+                    is_grasped = to_bool(step_info.get("is_grasped", False))
                 if is_grasped is True:
                     grasp_steps.append(step_num)
             
@@ -558,10 +561,12 @@ def main():
     
     if best['success']:
         print(f"\n✅ 成功！已达到目标（>= {args.min_steps} 步）")
-        return 0
     else:
         print(f"\n⚠️  注意: 最优结果({best['grasp_steps']}步)仍未达到目标({args.min_steps}步)")
-        return 1
+        print(f"   但已保留最优配置，将继续推理")
+    
+    # 无论是否达到目标，都返回成功（因为已保存最优配置）
+    return 0
 
 
 if __name__ == "__main__":
