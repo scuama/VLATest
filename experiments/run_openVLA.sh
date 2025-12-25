@@ -8,6 +8,7 @@ models=("$1")
 datasets=("$2")
 
 output_root=$3
+no_retry=${4:-0}
 
 timeout_duration="1h"  # Adjust the timeout duration as needed
 
@@ -34,6 +35,10 @@ for data in "${datasets[@]}"; do
           echo "Script failed, timed out, or got stuck; restarting ${model} on ${data} from ${log_count}..."
           pkill -f run_fuzzer.py  # Ensure the process is killed if timeout didn't do it
           sleep 5  # Wait a bit before retrying
+          if [ "$no_retry" = "1" ]; then
+            echo "No-retry mode enabled; exiting."
+            exit 1
+          fi
         fi
       done
     else

@@ -130,10 +130,12 @@ class VLAInterface:
         
         # Get max_steps from options but DON'T use TimeLimit wrapper
         max_steps = None
+        
         if options is not None and "max_episode_steps" in options:
             max_steps = int(options.get("max_episode_steps"))
-        
+        env.prepackaged_config = False
         obs, reset_info = env.reset(seed=seed, options=options)
+            
         # Handle potential wrapper - try direct method first, fallback to unwrapped
         if hasattr(env, 'get_language_instruction'):
             original_instruction = env.get_language_instruction()
@@ -159,6 +161,7 @@ class VLAInterface:
         episode_stats = {}
         actions = []  # updated by zeqin: collect actions for saving/replay
         while not (predicted_terminated or truncated):
+            print(max_steps)
             # Check manual step limit
             if max_steps is not None and timestep >= max_steps:
                 truncated = True

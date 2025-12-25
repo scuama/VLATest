@@ -130,6 +130,7 @@ class CustomSceneEnv(BaseEnv):
             urdf_version = ""
         self.urdf_version = urdf_version
         self.disable_bad_material = disable_bad_material
+        self.occlusion_cfgs = None
         
         super().__init__(**kwargs)
     
@@ -225,6 +226,38 @@ class CustomSceneEnv(BaseEnv):
     
     def reset(self, seed=None, options=None):
         self.robot_init_options = options.get("robot_init_options", {})
+        rgb_overlay_path = options.get("rgb_overlay_path", None)
+        rgb_overlay_cameras = options.get("rgb_overlay_cameras", None)
+        rgb_overlay_mode = options.get("rgb_overlay_mode", None)
+        rgb_always_overlay_objects = options.get("rgb_always_overlay_objects", None)
+        if (
+            rgb_overlay_path is not None
+            or rgb_overlay_cameras is not None
+            or rgb_overlay_mode is not None
+            or rgb_always_overlay_objects is not None
+        ):
+            if rgb_overlay_path is not None:
+                if not os.path.exists(rgb_overlay_path):
+                    raise FileNotFoundError(
+                        f"rgb_overlay_path {rgb_overlay_path} is not found."
+                    )
+                self.rgb_overlay_img = cv2.cvtColor(
+                    cv2.imread(rgb_overlay_path), cv2.COLOR_BGR2RGB
+                ) / 255
+                self.rgb_overlay_path = rgb_overlay_path
+            if rgb_overlay_cameras is not None:
+                if not isinstance(rgb_overlay_cameras, list):
+                    rgb_overlay_cameras = [rgb_overlay_cameras]
+                self.rgb_overlay_cameras = rgb_overlay_cameras
+            if rgb_overlay_mode is not None:
+                self.rgb_overlay_mode = rgb_overlay_mode
+            if rgb_always_overlay_objects is not None:
+                self.rgb_always_overlay_objects = rgb_always_overlay_objects
+        self.occlusion_cfgs = (
+            options.get("occlusion_cfgs")
+            or options.get("occlusion")
+            or options.get("occluder_cfgs")
+        )
         obs, info = super().reset(seed=seed, options=options)
         info.update({
             'scene_name': self.scene_name,
@@ -236,6 +269,7 @@ class CustomSceneEnv(BaseEnv):
             'rgb_overlay_cameras': self.rgb_overlay_cameras,
             'rgb_overlay_mode': self.rgb_overlay_mode,
             'disable_bad_material': self.disable_bad_material,
+            'occlusion_cfgs': self.occlusion_cfgs,
         })
         return obs, info
     
@@ -396,7 +430,89 @@ class CustomSceneEnv(BaseEnv):
                     # obs['image'][camera_name]['Color'][..., :3] = obs['image'][camera_name]['Color'][..., :3] * (1 - mask) + rgb_overlay_img * mask
                     obs['image'][camera_name]['Color'][..., :3] = obs['image'][camera_name]['Color'][..., :3] * 0.5 + rgb_overlay_img * 0.5
                 
+        if self._obs_mode == "image" and self.occlusion_cfgs:
+            self._apply_occlusion(obs)
+
         return obs
+
+    def _apply_occlusion(self, obs):
+        cfg = self.occlusion_cfgs
+        if not isinstance(cfg, dict):
+            return
+
+        paths = cfg.get("paths")
+        if isinstance(paths, str):
+            paths = [paths]
+        if paths is None:
+            path = cfg.get("path")
+            paths = [path] if path else []
+        if not paths:
+            return
+
+        alpha = float(cfg.get("alpha", 1.0))
+        alpha = max(0.0, min(1.0, alpha))
+        scale_range = cfg.get("scale_range", [0.25, 0.45])
+        if isinstance(scale_range, (int, float)):
+            scale_range = [float(scale_range), float(scale_range)]
+        if not (isinstance(scale_range, (list, tuple)) and len(scale_range) == 2):
+            scale_range = [0.25, 0.45]
+
+        cameras = cfg.get("cameras")
+        if isinstance(cameras, str):
+            cameras = [cameras]
+        if not cameras:
+            cameras = list(obs.get("image", {}).keys())
+
+        overlay_path = paths[self._episode_rng.randint(len(paths))]
+        if not overlay_path or not os.path.exists(overlay_path):
+            return
+
+        overlay_bgr = cv2.imread(overlay_path, cv2.IMREAD_COLOR)
+        if overlay_bgr is None:
+            return
+        overlay_rgb = cv2.cvtColor(overlay_bgr, cv2.COLOR_BGR2RGB)
+
+        for camera_name in cameras:
+            if camera_name not in obs.get("image", {}):
+                continue
+            color = obs["image"][camera_name]["Color"]
+            if color is None or color.shape[2] < 3:
+                continue
+
+            img_h, img_w = color.shape[0], color.shape[1]
+            size_px = cfg.get("size_px")
+            if isinstance(size_px, (list, tuple)) and len(size_px) == 2:
+                occ_w, occ_h = int(size_px[0]), int(size_px[1])
+            else:
+                scale = self._episode_rng.uniform(scale_range[0], scale_range[1])
+                occ_w = max(1, int(img_w * scale))
+                occ_h = max(1, int(img_h * scale))
+
+            occ = cv2.resize(overlay_rgb, (occ_w, occ_h), interpolation=cv2.INTER_LINEAR)
+
+            pos = cfg.get("position", "random")
+            if isinstance(pos, (list, tuple)) and len(pos) == 2:
+                x_val, y_val = pos
+                if 0.0 <= x_val <= 1.0 and 0.0 <= y_val <= 1.0:
+                    x = int((img_w - occ_w) * x_val)
+                    y = int((img_h - occ_h) * y_val)
+                else:
+                    x = int(x_val)
+                    y = int(y_val)
+            elif pos == "center":
+                x = (img_w - occ_w) // 2
+                y = (img_h - occ_h) // 2
+            else:
+                x = self._episode_rng.randint(0, max(1, img_w - occ_w + 1))
+                y = self._episode_rng.randint(0, max(1, img_h - occ_h + 1))
+
+            x = max(0, min(img_w - occ_w, x))
+            y = max(0, min(img_h - occ_h, y))
+
+            region = color[y:y + occ_h, x:x + occ_w, :3].astype(np.float32)
+            occ_f = occ.astype(np.float32)
+            blended = region * (1.0 - alpha) + occ_f * alpha
+            color[y:y + occ_h, x:x + occ_w, :3] = blended.astype(color.dtype)
 
     def compute_dense_reward(self, info, **kwargs):
         # sparse reward for now

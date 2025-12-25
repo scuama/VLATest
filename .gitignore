@@ -64,3 +64,5 @@ optimization/*/log/
 
 # Move optimization logs
 move_optimization/**/*.log
+
+result

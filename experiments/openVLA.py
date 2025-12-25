@@ -69,7 +69,7 @@ if __name__ == '__main__':
         else:
             vla = VLAInterface(model_name=args.model, task="widowx_put_in_customizable", lora_path=args.lora_path)
     else:
-        raise NotImplementedError(f"Cannot infer task from dataset name: {dataset_name}")
+        vla = VLAInterface(model_name=args.model, task="google_robot_pick_customizable_ycb", lora_path=args.lora_path)
 
     with open(data_path, 'r') as f:
         tasks = json.load(f)
@@ -106,7 +106,7 @@ if __name__ == '__main__':
     episode_keys = [k for k in tasks.keys() if k not in ['num', 'seed']]
     
     for idx in tqdm(range(tasks["num"])):
-        print("start\n")
+       
         
         # 支持两种键格式：索引键（"0", "1", "2"）或 episode_id 键（"7", "2", "44"）
         if str(idx) in tasks:
@@ -118,13 +118,13 @@ if __name__ == '__main__':
             continue
         
         if args.resume and os.path.exists(result_dir + f"/{episode_key}/" + '/log.json'):  # if resume allowed then skip the finished runs.
-            print("end\n")
+
             continue
         options = tasks[episode_key]
         # 设置最大步数以加速测试（如果options中没有设置的话）
         if "max_episode_steps" not in options:
             options["max_episode_steps"] = 20  # 可以根据需要调整这个数值
-        print("go\n")
+      
         images, episode_stats, actions = vla.run_interfaceWithPromot(seed=random_seed, options=options,promot=PROMPT_TEMPLATES)
         os.makedirs(result_dir + f"/{episode_key}", exist_ok=True)
         with open(result_dir + f"/{episode_key}/" + '/log.json', "w") as f:
